@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0" styleClass="border-pane" stylesheets="@../../../utilitarios/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.cadastro.Cadastro.CadastroPessoaController">
+   <center>
+      <TabPane prefHeight="455.0" prefWidth="761.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+         <tabs>
+            <Tab fx:id="tabDadoPessoais" text="%tab.dados.pessoais">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="495.0" prefWidth="800.0">
+                     <children>
+                        <GridPane layoutX="14.0" layoutY="7.0" prefHeight="434.0" prefWidth="733.0">
+                           <children>
+                              <Label text="%lbl.nome" />
+                              <Label text="%lbl.sexo" GridPane.rowIndex="1" />
+                              <Label text="%lbl.cpf" GridPane.rowIndex="2" />
+                              <Label text="%lbl.dataNascimento" GridPane.rowIndex="3" />
+                              <Label text="%lbl.telefoneSecundario" GridPane.rowIndex="5" />
+                              <Label text="%lbl.email" GridPane.rowIndex="6" />
+                              <Label text="%lbl.endereco" GridPane.rowIndex="7" />
+                              <Label text="%lbl.funcao" GridPane.rowIndex="8" />
+                              <Label text="%lbl.numMatricula" GridPane.rowIndex="9" />
+                              <Label text="%lbl.statusAtividade" GridPane.rowIndex="10" />
+                              <Label text="%lbl.usuario" GridPane.rowIndex="11" />
+                              <Label text="%lbl.senha" GridPane.rowIndex="12" />
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                 <children>
+                                    <TextField fx:id="txtNome" prefWidth="350.0" />
+                                    <Label fx:id="nomeObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <children>
+                                    <RadioButton fx:id="rdbFeminino" alignment="BOTTOM_CENTER" mnemonicParsing="false" onKeyPressed="#rdbFemininoOnKeyPressed" prefHeight="23.0" prefWidth="84.0" text="%rdb.feminino">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="Sexo" />
+                                       </toggleGroup></RadioButton>
+                                    <RadioButton fx:id="rdbMasculino" alignment="BOTTOM_CENTER" mnemonicParsing="false" onKeyPressed="#rdbMasculinoOnKeyPressed" prefHeight="26.0" prefWidth="94.0" text="%rdb.masculino" toggleGroup="$Sexo" />
+                                    <Label fx:id="sexoObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <children>
+                                    <TextField fx:id="txtCpf" prefWidth="150.0" />
+                                    <Label fx:id="cpfObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                    <Label text="%lbl.rg" />
+                                    <TextField fx:id="txtRg" prefHeight="25.0" prefWidth="150.0" />
+                                    <Label fx:id="rgObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <children>
+                                    <DatePicker fx:id="dtpDtNascimento" prefHeight="25.0" prefWidth="119.0" styleClass="date-piker" />
+                                    <Label fx:id="dtNascimentoObrigatorio" styleClass="label-alert" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="15.0" prefWidth="611.0" stylesheets="@../../../utilitarios/teste.css" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                 <children>
+                                    <TextField fx:id="txtPrincipal" maxWidth="150.0" />
+                                    <Label fx:id="foneObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                 <children>
+                                    <TextField fx:id="txtSecundario" maxWidth="150.0" prefHeight="20.0" />
+                                    <Label fx:id="lblsecundario" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                 <children>
+                                    <TextField fx:id="txtEmail" prefWidth="300.0" />
+                                    <Label fx:id="emailObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                 <children>
+                                    <TextField fx:id="txtEndereco" prefHeight="27.0" prefWidth="450.0" />
+                                    <Label fx:id="enderecoObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                                 <children>
+                                    <ComboBox fx:id="cmbFuncao" prefWidth="150.0" />
+                                    <Label fx:id="funcaoObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                                 <children>
+                                    <TextField fx:id="txtNumMatricula" prefWidth="150.0" />
+                                    <Label fx:id="matriculaObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
+                                 <children>
+                                    <RadioButton fx:id="rdbAtivo" mnemonicParsing="false" text="%rdb.ativo">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="Atividade" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton fx:id="rdbInativo" mnemonicParsing="false" text="%rdb.inativo" toggleGroup="$Atividade" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="16.0" prefWidth="611.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
+                                 <children>
+                                    <TextField fx:id="txtUsuario" prefWidth="150.0" />
+                                    <Label fx:id="usuarioObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                    <CheckBox fx:id="checkAlterarSenha" mnemonicParsing="false" onAction="#checkAlterarSenha_OnAction" onKeyPressed="#checkAlterarSenha_OnKeyPressed" text="%lbl.alterarSenha" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="12">
+                                 <children>
+                                    <PasswordField fx:id="txtSenha" onKeyReleased="#txtSenha_OnKeyReleased" onKeyTyped="#txtSenha_OnKeyTyped" prefWidth="150.0" />
+                                    <Label fx:id="senhaObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                    <Label text="%lbl.repSenha" />
+                                    <PasswordField fx:id="txtRSenha" prefWidth="150.0" />
+                                    <Label fx:id="repSenhaObrigatorio" styleClass="label-alert" stylesheets="@../../../utilitarios/teste.css" text="%lbl.campoObrigatorio" textFill="#fc0909" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="13">
+                                 <children>
+                                    <ProgressBar fx:id="barSenha" minHeight="10.0" minWidth="200.0" prefHeight="20.0" prefWidth="200.0">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                    </ProgressBar>
+                                    <Label fx:id="lblStatusSeguranca" text="%lbl.StatusSenhaInsuficiente">
+                                       <HBox.margin>
+                                          <Insets left="5.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <Label text="%lbl.telefonePrincipal" GridPane.rowIndex="4" />
+                              <Label text="%lbl.SegurancaSenha" GridPane.rowIndex="13" />
+                           </children>
+                           <columnConstraints>
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="358.0" minWidth="10.0" prefWidth="145.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="631.0" minWidth="10.0" prefWidth="588.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+         </tabs>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+      </TabPane>
+   </center>
+   <top>
+      <Label fx:id="Title" styleClass="label-head" text="%title.cadastro.pessoa" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+         <BorderPane.margin>
+            <Insets bottom="10.0" top="10.0" />
+         </BorderPane.margin>
+      </Label>
+   </top>
+   <bottom>
+      <GridPane prefHeight="52.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <HBox alignment="TOP_RIGHT" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+               <children>
+                  <Button fx:id="btnSalvar" alignment="CENTER" mnemonicParsing="false" onAction="#btnSalvarOnAction" onKeyPressed="#btnSalvarOnKeyPressed" prefWidth="100.0" styleClass="button-save" text="%btn.salvar" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <children>
+                  <Button fx:id="btnCancelar" alignment="CENTER" mnemonicParsing="false" onAction="#btnCancelarOnAction" onKeyPressed="#btnCancelarOnKeyPressed" prefWidth="100.0" styleClass="button-cancel" text="%btn.cancelar">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </GridPane>
+   </bottom>
+</BorderPane>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.net.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="bdp_principal" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@../utilitarios/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PrincipalController">
+   <bottom>
+      <Label text="SystemAutonet 1.0 SNAPSHOT" textAlignment="CENTER" BorderPane.alignment="CENTER" />
+   </bottom>
+   <center>
+      <ImageView fitHeight="219.0" fitWidth="629.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+         <image>
+            <Image url="@../utilitarios/LogoSistema.png" />
+         </image>
+      </ImageView>
+   </center>
+   <top>
+      <VBox prefHeight="102.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+         <children>
+            <MenuBar fx:id="mnu_bar">
+               <menus>
+                  <Menu fx:id="mnu_Cadastro" mnemonicParsing="false" text="%mnu.Cadastro">
+                     <items>
+                        <MenuItem fx:id="cad_Categoria" mnemonicParsing="false" onAction="#cad_Categoria" text="%mni.Categoria" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_departamento" mnemonicParsing="false" onAction="#cad_departamentoOnAction" text="%mni.Departamento" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_fornecedor" mnemonicParsing="false" onAction="#cad_fornecedorOnAction" text="%mni.Fornecedor" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_local" mnemonicParsing="false" onAction="#cad_local_OnAction" text="%mni.Local" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_material" mnemonicParsing="false" onAction="#cad_materialOnAction" text="%mni.Material" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_pessoa" mnemonicParsing="false" onAction="#cad_pessoaOnAction" text="%mni.Pessoa" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_tipoBaixa" mnemonicParsing="false" onAction="#cad_tipoBaixaOnAction" text="%mni.TipoBaixa" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cad_unidadeMedida" mnemonicParsing="false" onAction="#cad_unidadeMedidaOnAction" text="%mni.UnidadeMedida" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="mnu_emprestimo" mnemonicParsing="false" text="%mnu.Emprestimo">
+                     <items>
+                        <MenuItem fx:id="emp_acompanhar" mnemonicParsing="false" onAction="#emp_acompanharOnAction" text="%mni.Acompanhar" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="emp_analisar" mnemonicParsing="false" onAction="#emp_analisarOnAction" text="%mni.Analisar" />
+                        <SeparatorMenuItem fx:id="SeparadoAcompanharAnalisar" mnemonicParsing="false" />
+                        <MenuItem fx:id="emp_devolver" mnemonicParsing="false" onAction="#emp_devolverOnAction" text="%mni.Devolver" />
+                        <SeparatorMenuItem fx:id="SeparadoDevolverSoliticar" mnemonicParsing="false" />
+                        <MenuItem fx:id="emp_solicitar" mnemonicParsing="false" onAction="#emp_solicitarOnAction" text="%mni.Solicitar" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="mnu_estoque" mnemonicParsing="false" text="%mnu.Estoque">
+                     <items>
+                        <MenuItem fx:id="est_baixarMaterial" mnemonicParsing="false" text="%mni.BaixarMaterial" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="est_entradaMaterial" mnemonicParsing="false" onAction="#est_entradaMaterial_OnAction" text="%mni.EntradaMaterial" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="mnu_consulta" mnemonicParsing="false" text="%mnu.Consulta">
+                     <items>
+                        <MenuItem fx:id="cons_emprestimo" mnemonicParsing="false" text="%mni.Emprestimo" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cons_fornecedor" mnemonicParsing="false" text="%mni.Fornecedor" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cons_local" mnemonicParsing="false" text="%mni.Local" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cons_material" mnemonicParsing="false" text="%mni.Material" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu fx:id="cons_mnu_Movimetacoes" mnemonicParsing="false" text="%mnu.Movimentacoes">
+                           <items>
+                              <MenuItem fx:id="cons_mov_entradaMaterial" mnemonicParsing="false" text="%mni.EntradaMaterial" />
+                              <SeparatorMenuItem mnemonicParsing="false" />
+                              <MenuItem fx:id="cons_mov_saidaMaterial" mnemonicParsing="false" text="%mni.SaidaMaterial" />
+                           </items>
+                        </Menu>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="cons_pessoa" mnemonicParsing="false" text="%mni.Pessoa" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="mnu_ajuda" mnemonicParsing="false" text="%mnu.Ajuda">
+                     <items>
+                        <MenuItem fx:id="ajuda_sobre" mnemonicParsing="false" text="%mni.Sobre" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="ajuda_manualSistema" mnemonicParsing="false" text="%mni.ManualSistema" />
+                     </items>
+                  </Menu>
+               </menus>
+            </MenuBar>
+            <HBox alignment="TOP_RIGHT" prefHeight="67.0" prefWidth="800.0">
+               <children>
+                  <Label fx:id="txtDadosPessoais">
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Button fx:id="btnLogoff" mnemonicParsing="false" onAction="#btnLogoffOnAction" styleClass="button-logoff">
+                     <HBox.margin>
+                        <Insets right="20.0" top="5.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+   </top>
+</BorderPane>

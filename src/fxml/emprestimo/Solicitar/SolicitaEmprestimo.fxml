@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@../../../utilitarios/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.emprestimo.solicita.SolicitaEmprestimoController">
+   <top>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label alignment="CENTER" styleClass="label-head" text="%title.solicitar.emprestimo" />
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <TabPane fx:id="tabPanePrincipal" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab fx:id="tabBuscarMaterial" text="%tab.emprestimo.solicitar">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <HBox alignment="CENTER" prefHeight="30.0" prefWidth="798.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label styleClass="label-subtitle" text="%subTitle.emprestimo.solicitar.listaMateriais" />
+                           </children>
+                        </HBox>
+                     </top>
+                     <center>
+                        <TableView fx:id="tblListaMateriais" prefHeight="336.0" prefWidth="778.0" BorderPane.alignment="CENTER">
+                          <columns>
+                            <TableColumn fx:id="tbcDescricaoListaMaterial" prefWidth="355.0" text="%tblColumn.descricao" />
+                            <TableColumn fx:id="tbcQuantidadeSolicitadaListaMaterial" prefWidth="113.0" text="%tblColumn.quantidade" />
+                              <TableColumn fx:id="tbcCategoriaListaMaterial" prefWidth="288.0" text="%tblColumn.Categoria" />
+                          </columns>
+                           <BorderPane.margin>
+                              <Insets left="20.0" right="20.0" />
+                           </BorderPane.margin>
+                        </TableView>
+                     </center>
+                     <bottom>
+                        <VBox prefHeight="180.0" prefWidth="798.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <GridPane prefHeight="126.0" prefWidth="696.0">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="26.0" prefWidth="696.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <children>
+                                          <TextField fx:id="txtFinalidade" maxHeight="25.0" prefHeight="25.0" prefWidth="315.0" />
+                                          <Label fx:id="finalidadeObrigatorio" styleClass="label-alert" text="%lbl.campoObrigatorio" />
+                                          <Label text="%lbl.dataEmprestimo">
+                                             <HBox.margin>
+                                                <Insets left="5.0" right="3.0" />
+                                             </HBox.margin>
+                                          </Label>
+                                          <DatePicker fx:id="dtpDataEmprestimo" prefHeight="25.0" prefWidth="141.0" />
+                                          <Label fx:id="dataObrigatorio" styleClass="label-alert" text="%lbl.campoObrigatorio" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <children>
+                                          <TextArea fx:id="txtObservacao" prefHeight="54.0" prefWidth="626.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label text="%lbl.finalidade" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="TOP_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label text="%lbl.observacao" />
+                                       </children>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0" />
+                                    <HBox alignment="TOP_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                       <children>
+                                          <Button fx:id="btnAdicionar" mnemonicParsing="false" onAction="#btnAdicionarOnAction" styleClass="button-adicionar" text="Adicionar">
+                                             <tooltip>
+                                                <Tooltip text="%adicionar.tooltip.solicitarEmprestimo" />
+                                             </tooltip>
+                                             <HBox.margin>
+                                                <Insets left="10.0" right="10.0" top="3.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                          <Button fx:id="btnEditar" mnemonicParsing="false" onAction="#btnEditarOnAction" styleClass="button-editar" text="Editar">
+                                             <tooltip>
+                                                <Tooltip text="%editar.tooltip.solicitarEmprestimo" />
+                                             </tooltip>
+                                             <HBox.margin>
+                                                <Insets left="10.0" right="10.0" top="3.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                          <Button fx:id="btnExclur" mnemonicParsing="false" onAction="#btnExclurOnAction" styleClass="button-remover" text="Remover">
+                                             <tooltip>
+                                                <Tooltip text="%remover.tooltip.solicitarEmprestimo" />
+                                             </tooltip>
+                                             <HBox.margin>
+                                                <Insets left="10.0" right="20.0" top="3.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="338.0" minWidth="10.0" prefWidth="143.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="655.0" minWidth="10.0" prefWidth="655.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="BASELINE" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="37.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="54.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                              </GridPane>
+                              <GridPane prefHeight="51.0" prefWidth="800.0">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="45.0" prefWidth="800.0">
+                                       <children>
+                                          <Button fx:id="btnSolicitar" mnemonicParsing="false" onAction="#btnSolicitarOnAction" styleClass="button-solicitar" text="%btn.solicitar">
+                                             <HBox.margin>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                          <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#btnCancelarOnAction" styleClass="button-cancel" text="%btn.cancelar">
+                                             <HBox.margin>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                              </GridPane>
+                           </children>
+                        </VBox>
+                     </bottom>
+                  </BorderPane>
+               </content>
+            </Tab>
+          <Tab fx:id="tabListaMaterial" text="%tab.emprestimo.separarMaterial">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <GridPane BorderPane.alignment="CENTER">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label styleClass="label-subtitle" text="%subTitle.emprestimo.solicitar.separarMateriais" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                 <children>
+                                    <Label text="%lbl.pesquisar" />
+                                    <TextField fx:id="txtBuscador" maxHeight="25.0" prefHeight="25.0" prefWidth="383.0" />
+                                    <Button fx:id="btnBuscar" mnemonicParsing="false" onAction="#btnBuscarOnAction" prefHeight="25.0" prefWidth="29.0" styleClass="button-search" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </GridPane>
+                     </top>
+                     <center>
+                        <TableView fx:id="tblBuscaMateriais" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                          <columns>
+                            <TableColumn fx:id="tbcMaterialBuscaMaterial" prefWidth="374.0" text="%tblColumn.material" />
+                            <TableColumn fx:id="tbcQuantidadeDisponivelBuscaMaterial" prefWidth="166.0" text="%tblColumn.quantidadeDisponivel" />
+                              <TableColumn fx:id="tbcCategoriaBuscaMaterial" prefWidth="216.0" text="%tblColumn.categoria" />
+                          </columns>
+                           <BorderPane.margin>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </BorderPane.margin>
+                        </TableView>
+                     </center>
+                     <bottom>
+                        <GridPane prefHeight="41.0" prefWidth="798.0" BorderPane.alignment="CENTER">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Button fx:id="btnAdicionarMaterial" mnemonicParsing="false" onAction="#btnAdicionarMaterialOnAction" styleClass="button-adicionarPedido" text="%btn.adicionarMaterial">
+                                       <HBox.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnVoltar" mnemonicParsing="false" onAction="#btnVoltarOnAction" styleClass="button-voltar" text="%btn.voltar">
+                                       <HBox.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </GridPane>
+                     </bottom>
+                  </BorderPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+</BorderPane>

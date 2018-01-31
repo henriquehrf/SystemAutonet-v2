@@ -1,0 +1,38 @@
+Filtros Necessários no Cadastro
+
+Consultar Departamento
+1-Por Nome -> ok
+2-Por Sigla -> ok
+
+Consultar Fornecedor
+
+1-Nome Fantasia -> ok
+2-Razão Social -> ok
+3-CNPJ -> ok
+4-Pessoa Responsável -> ok
+
+Consultar Locais
+
+1-Descrição -> ok
+2-Número -> ok
+3-Bloco -> ok
+4-Pessoa Responsável -> ok
+
+Consulta Material
+
+1-Descrição -> ok
+2-Quantidade -> ok
+3-Categoria  -> ok
+
+Consulta Pessoa
+
+1-Nome -> ok
+2-CPF -> ok
+3-RG -> ok
+4-Numero de Matricula -> ok
+
+Consulta Tipo de Saida
+1-Descrição -> ok
+
+Unidade de Medida
+1-descrição
