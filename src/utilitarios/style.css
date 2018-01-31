@@ -214,6 +214,38 @@
     -fx-alignment:CENTER;
 
 }
+
+.button-countDown{
+    -fx-border-color:darkgrey;
+    -fx-background-color:none;
+    -fx-background-color: linear-gradient( #ffffff, #808080);
+    -fx-background-image: url('icones/arrow-down.png');
+    -fx-background-size: 12 12 ;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-max-height:12.5;
+    -fx-max-width:25;
+    -fx-min-height:12.5;
+    -fx-min-width:25;
+    -fx-alignment:CENTER;
+
+}
+
+.button-countUp{
+    -fx-border-color:darkgrey;
+    -fx-background-color:none;
+    -fx-background-color: linear-gradient( #ffffff, #808080);
+    -fx-background-image: url('icones/arrow-up.png');
+    -fx-background-size: 12 12 ;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-max-height:12.5;
+    -fx-max-width:25;
+    -fx-min-height:12.5;
+    -fx-min-width:25;
+    -fx-alignment:CENTER;
+
+}
 .button-cadastrar{
     -fx-border-color:darkgrey;
     -fx-background-color:none;

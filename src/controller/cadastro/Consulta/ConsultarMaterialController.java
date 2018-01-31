@@ -1,7 +1,6 @@
 package controller.cadastro.Consulta;
 
 import classesAuxiliares.NegociosEstaticos;
-import classesAuxiliares.Validar;
 import controller.PrincipalController;
 import controller.cadastro.Cadastro.CadastroMaterialController;
 import gui.SystemAutonet;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Properties;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -18,8 +16,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -27,8 +23,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -37,16 +31,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import negocio.NegocioPessoa;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Categoria;
 import vo.Material;
 
 public class ConsultarMaterialController {
-
-    @FXML
-    private Slider SliderBarQtd;
 
     @FXML
     private TextField txtQuantidade;
@@ -90,6 +80,8 @@ public class ConsultarMaterialController {
     @FXML
     private TableColumn<Material, String> tbcUnidadeMedida;
 
+    List<Material> cacheList = null;
+
     void completarCombo() {
         List<Categoria> lista = NegociosEstaticos.getNegocioCategoria().bucarTodos();
         ObservableList<String> dado = FXCollections.observableArrayList();
@@ -105,18 +97,24 @@ public class ConsultarMaterialController {
 
     public void initialize() {
 
+        txtQuantidade.setText("0");
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 txtBuscador.requestFocus();
+                completarCombo();
             }
         });
-        List<Material> lista = NegociosEstaticos.getNegocioMaterial().buscarTodos();
-        completarCombo();
-        completarTabela(lista);
-        SliderBarQtd.setValue(1);
-        habilitarSlider(lista);
-        MaxAndMinSlider(lista);
+
+        new Thread() {
+            @Override
+            public void run() {
+
+                cacheList = NegociosEstaticos.getNegocioMaterial().buscarTodos();
+                completarTabela(cacheList);
+            }
+        }.start();
 
     }
 
@@ -138,32 +136,6 @@ public class ConsultarMaterialController {
                 }
             }
         }
-    }
-
-    void habilitarSlider(List<Material> lista) {
-
-        txtQuantidade.setText("" + (int) SliderBarQtd.getValue());
-        SliderBarQtd.setMin(1);
-        SliderBarQtd.setMax(100);
-        SliderBarQtd.setShowTickLabels(true);
-        SliderBarQtd.setShowTickMarks(true);
-        SliderBarQtd.setMajorTickUnit(50);
-        SliderBarQtd.setMinorTickCount(0);
-        SliderBarQtd.setBlockIncrement(1);
-    }
-
-    @FXML
-    void SliderBarQtd_OnDragDetected(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
-    }
-
-    @FXML
-    void SliderBarQtd_OnDragDone(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
     }
 
     @FXML
@@ -188,72 +160,6 @@ public class ConsultarMaterialController {
                 }
             });
             cm.show(Title, event.getScreenX(), event.getScreenY());
-        }
-    }
-
-    @FXML
-    void SliderBarQtd_OnDragDropped(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
-    }
-
-    @FXML
-    void SliderBarQtd_OnDragEntered(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
-    }
-
-    @FXML
-    void SliderBarQtd_OnDragExited(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
-    }
-
-    @FXML
-    void SliderBarQtd_OnMouseClicked(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
-    }
-
-    @FXML
-    void SliderBarQtd_OnMouseDragged(MouseEvent event) {
-        int qtd = (int) SliderBarQtd.getValue();
-        txtQuantidade.setText("" + qtd);
-        btnBusca_OnMouseClicked(event);
-    }
-
-    @FXML
-    void SliderBarQtd_OnKeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT) {
-            int qtd = (int) SliderBarQtd.getValue();
-            txtQuantidade.setText("" + qtd);
-            btnBusca_OnKeyPressed(event);
-        }
-        if (event.getCode() == KeyCode.ENTER) {
-            txtQuantidade_OnKeyPressed(event);
-        }
-    }
-
-    @FXML
-    void SliderBarQtd_OnKeyReleased(KeyEvent event) {
-        if (event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.LEFT) {
-            int qtd = (int) SliderBarQtd.getValue();
-            txtQuantidade.setText("" + qtd);
-            btnBusca_OnKeyPressed(event);
-        }
-    }
-
-    @FXML
-    void txtQuantidade_OnKeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.ENTER && !txtQuantidade.getText().isEmpty()) {
-            double value = Double.parseDouble(txtQuantidade.getText());
-            SliderBarQtd.setValue(value);
-            btnBusca_OnKeyPressed(event);
-            txtQuantidade.selectAll();
         }
     }
 
@@ -382,16 +288,7 @@ public class ConsultarMaterialController {
     @FXML
     void btnBusca_OnKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            if (cmbCategoria.getValue().equals("TODOS")) {
-                Material material = new Material();
-                material.setDescricao(txtBuscador.getText());
-                completarTabela(NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material));
-            } else {
-                Material material = new Material();
-                material.setDescricao(txtBuscador.getText());
-                CategoriaFilter(NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material));
-
-            }
+            buscaMaterial();
         }
         if (event.getCode() == KeyCode.TAB) {
             cmbCategoria.requestFocus();
@@ -400,17 +297,11 @@ public class ConsultarMaterialController {
     }
 
     void completarTabela(List<Material> lista) {
-        try {
-            lista = ListarQtd(lista);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+
+        lista = qtdFilter(Integer.parseInt(txtQuantidade.getText()));
 
         ObservableList<Material> dado = FXCollections.observableArrayList();
-        for (int i = 0; i < lista.size(); i++) {
-            dado.add(lista.get(i));
-        }
-        habilitarSlider(dado);
+        dado.addAll(lista);
         this.tbcDescricao.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
         this.tbcQuantidade.setCellValueFactory(new PropertyValueFactory<Material, Number>("quantidade"));
         this.tbcUnidadeMedida.setCellValueFactory(new PropertyValueFactory<Material, String>("unidadeMedida"));
@@ -431,18 +322,75 @@ public class ConsultarMaterialController {
         };
         Collections.sort(dado, cmp);
         this.tblPrincipal.setItems(dado);
+        tblPrincipal.refresh();
 
     }
 
-    List<Material> ListarQtd(List<Material> lista) {
-        List<Material> aux = new ArrayList<Material>();
-        int qtd = (int) SliderBarQtd.getValue();
-        for (int i = 0; i < lista.size(); i++) {
-            if (lista.get(i).getQuantidade() >= qtd) {
-                aux.add(lista.get(i));
+    List<Material> qtdFilter(int value) {
+        List<Material> filter = new ArrayList<>();
+        for (int i = 0; i < cacheList.size(); i++) {
+            if (cacheList.get(i).getQuantidade() >= value) {
+                filter.add(cacheList.get(i));
             }
         }
-        return aux;
+        return filter;
+    }
+
+    void tickCount(Boolean isIncrement) {
+        int count = 0;
+        if (isIncrement) {
+            count = Integer.parseInt(txtQuantidade.getText());
+            count++;
+            txtQuantidade.setText("" + count);
+        } else {
+            count = Integer.parseInt(txtQuantidade.getText());
+            count--;
+            if (count < 0) {
+                count = 0;
+            }
+            txtQuantidade.setText("" + count);
+        }
+        completarTabela(cacheList);
+    }
+
+    @FXML
+    void txtQuantidadeOnKeyReleased(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            if (txtQuantidade.getText().length() == 0) {
+                txtQuantidade.setText("0");
+                completarTabela(cacheList);
+            } else {
+                if (Integer.parseInt(txtQuantidade.getText()) < 0) {
+                    txtQuantidade.setText("0");
+                }
+                completarTabela(cacheList);
+            }
+
+        }
+    }
+
+    @FXML
+    void btnDownQtdOnAction(ActionEvent event) {
+        tickCount(false);
+
+    }
+
+    @FXML
+    void btnDownQtdOnKeyReleased(KeyEvent event) {
+        tickCount(false);
+
+    }
+
+    @FXML
+    void btnUpQtdOnKeyReleased(KeyEvent event) {
+        tickCount(true);
+
+    }
+
+    @FXML
+    void btnUpQtdOnAction(ActionEvent event) {
+        tickCount(true);
+
     }
 
     @FXML
@@ -459,31 +407,34 @@ public class ConsultarMaterialController {
 
     @FXML
     void btnBusca_OnAction(ActionEvent event) {
-        if (cmbCategoria.getValue().equals("TODOS")) {
-            Material material = new Material();
-            material.setDescricao(txtBuscador.getText());
-            completarTabela(NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material));
-        } else {
-            Material material = new Material();
-            material.setDescricao(txtBuscador.getText());
-            CategoriaFilter(NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material));
+        buscaMaterial();
+    }
 
-        }
+    void buscaMaterial() {
+        new Thread() {
+            @Override
+            public void run() {
+                if (cmbCategoria.getValue().equals("TODOS")) {
+                    Material material = new Material();
+                    material.setDescricao(txtBuscador.getText());
+                    cacheList = NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material);
+                    completarTabela(cacheList);
+                } else {
+                    Material material = new Material();
+                    material.setDescricao(txtBuscador.getText());
+                    cacheList = NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material);
+                    CategoriaFilter(cacheList);
+
+                }
+            }
+        }.start();
+
     }
 
     @FXML
     void btnBusca_OnMouseClicked(MouseEvent event) {
         if (event.getButton() == MouseButton.PRIMARY) {
-            if (cmbCategoria.getValue().equals("TODOS")) {
-                Material material = new Material();
-                material.setDescricao(txtBuscador.getText());
-                completarTabela(NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material));
-            } else {
-                Material material = new Material();
-                material.setDescricao(txtBuscador.getText());
-                CategoriaFilter(NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material));
-
-            }
+            buscaMaterial();
         }
     }
 
@@ -522,7 +473,8 @@ public class ConsultarMaterialController {
             LerMessage ler = new LerMessage();
             if (alert.alerta(Alert.AlertType.CONFIRMATION, "Remoção", ler.getMessage("msg.temcerteza"), "Sim", "Não")) {
                 NegociosEstaticos.getNegocioMaterial().remover(tblPrincipal.getSelectionModel().getSelectedItem());
-                completarTabela(NegociosEstaticos.getNegocioMaterial().buscarTodos());
+                cacheList = NegociosEstaticos.getNegocioMaterial().buscarTodos();
+                completarTabela(cacheList);
             }
         } catch (Exception ex) {
             Alertas alert = new Alertas();

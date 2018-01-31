@@ -105,16 +105,17 @@
                            </children>
                         </HBox>
                         <Label text="Quantidade:" />
-                        <Slider fx:id="SliderBarQtd" onDragDetected="#SliderBarQtd_OnDragDetected" onDragDone="#SliderBarQtd_OnDragDone" onDragDropped="#SliderBarQtd_OnDragDropped" onDragEntered="#SliderBarQtd_OnDragEntered" onDragExited="#SliderBarQtd_OnDragExited" onKeyPressed="#SliderBarQtd_OnKeyPressed" onKeyReleased="#SliderBarQtd_OnKeyReleased" onMouseClicked="#SliderBarQtd_OnMouseClicked" onMouseDragged="#SliderBarQtd_OnMouseDragged">
-                           <HBox.margin>
-                              <Insets left="5.0" />
-                           </HBox.margin>
-                        </Slider>
-                        <TextField fx:id="txtQuantidade" maxHeight="25.0" onKeyPressed="#txtQuantidade_OnKeyPressed" prefHeight="25.0" prefWidth="77.0">
+                        <TextField fx:id="txtQuantidade" maxHeight="25.0" onKeyReleased="#txtQuantidadeOnKeyReleased" prefHeight="25.0" prefWidth="77.0">
                            <HBox.margin>
                               <Insets left="5.0" />
                            </HBox.margin>
                         </TextField>
+                        <VBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="100.0">
+                           <children>
+                              <Button fx:id="btnUpQtd" mnemonicParsing="false" onAction="#btnUpQtdOnAction" onKeyReleased="#btnUpQtdOnKeyReleased" styleClass="button-countUp" />
+                              <Button fx:id="btnDownQtd" mnemonicParsing="false" onAction="#btnDownQtdOnAction" onKeyReleased="#btnDownQtdOnKeyReleased" styleClass="button-countDown" />
+                           </children>
+                        </VBox>
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
