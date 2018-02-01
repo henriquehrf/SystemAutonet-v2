@@ -17,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -24,6 +25,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -33,6 +35,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Departamento;
@@ -94,9 +97,28 @@ public class ConsultarLocaisController {
     @FXML
     private TableColumn<Local, String> tbcDepartamento;
 
-    //  private NegocioLocal negocioLocal;
-    List<Local> lista = NegociosEstaticos.getNegocioLocal().buscarTodos();
-    List<Departamento> aux = NegociosEstaticos.getNegocioDepartamento().buscarTodos();
+    List<Local> lista = null;
+
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
 
     public void initialize() {
 
@@ -104,13 +126,21 @@ public class ConsultarLocaisController {
             @Override
             public void run() {
                 txtBuscador.requestFocus();
+                tableLoading(true);
+
             }
         });
 
-        //  negocioLocal = new NegocioLocal();
+        new Thread() {
+            @Override
+            public void run() {
+                completarCombo(NegociosEstaticos.getNegocioDepartamento().buscarTodos());
+                lista = NegociosEstaticos.getNegocioLocal().buscarTodos();
+                completarTabela(lista);
+            }
+        }.start();
+
         rdbDescricao.setSelected(true);
-        completarCombo(aux);
-        completarTabela(lista);
 
     }
 
@@ -154,14 +184,21 @@ public class ConsultarLocaisController {
     }
 
     void completarCombo(List<Departamento> lista) {
-        ObservableList<String> dado = FXCollections.observableArrayList();
-        for (int i = 0; i < lista.size(); i++) {
-            dado.add(lista.get(i).getSigla());
-        }
-        dado.add("TODOS");
-        Collections.sort(dado);
-        cbmDepartamento.setItems(dado);
-        cbmDepartamento.setValue("TODOS");
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ObservableList<String> dado = FXCollections.observableArrayList();
+                for (int i = 0; i < lista.size(); i++) {
+                    dado.add(lista.get(i).getSigla());
+                }
+                dado.add("TODOS");
+                Collections.sort(dado);
+                cbmDepartamento.setItems(dado);
+                cbmDepartamento.setValue("TODOS");
+            }
+        });
+
     }
 
     @FXML
@@ -233,14 +270,7 @@ public class ConsultarLocaisController {
         }
     }
 
-    @FXML
-    void btnBuscar_OnAction(ActionEvent event) {
-//        if (rdbBloco.isSelected()) {
-//            Local local = new Local();
-////            local.setBloco(txtBuscador.getText());
-//            completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorBloco(local));
-//        }
-
+    void buscar() {
         if (!cbmDepartamento.getValue().equals("TODOS")) {
 
             if (rdbNumero.isSelected()) {
@@ -249,11 +279,22 @@ public class ConsultarLocaisController {
 
                 if (Validar.isDigit(buscar)) {
                     if (txtBuscador.getText().isEmpty()) {
-                        listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarTodos());
-                    } else {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarTodos());
+                            }
+                        }.start();
 
-                        local.setNumero(Integer.parseInt(txtBuscador.getText()));
-                        listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorNumero(local));
+                    } else {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                local.setNumero(Integer.parseInt(txtBuscador.getText()));
+                                listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorNumero(local));
+                            }
+                        }.start();
+
                     }
                 } else {
                     try {
@@ -266,14 +307,26 @@ public class ConsultarLocaisController {
                 }
             }
             if (rdbPessoaResponsavel.isSelected()) {
-                Local local = new Local();
-                local.setResponsavel(txtBuscador.getText());
-                listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorPessoaResponsavel(local));
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Local local = new Local();
+                        local.setResponsavel(txtBuscador.getText());
+                        listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorPessoaResponsavel(local));
+                    }
+                }.start();
+
             }
             if (rdbDescricao.isSelected()) {
-                Local local = new Local();
-                local.setDescricao(txtBuscador.getText());
-                listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorDescricao(local));
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Local local = new Local();
+                        local.setDescricao(txtBuscador.getText());
+                        listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorDescricao(local));
+                    }
+                }.start();
+
             }
         } else {
             if (rdbNumero.isSelected()) {
@@ -282,11 +335,23 @@ public class ConsultarLocaisController {
 
                 if (Validar.isDigit(buscar)) {
                     if (txtBuscador.getText().isEmpty()) {
-                        completarTabela(NegociosEstaticos.getNegocioLocal().buscarTodos());
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                completarTabela(NegociosEstaticos.getNegocioLocal().buscarTodos());
+                            }
+                        }.start();
+
                     } else {
 
                         local.setNumero(Integer.parseInt(txtBuscador.getText()));
-                        completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorNumero(local));
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorNumero(local));
+                            }
+                        }.start();
+
                     }
                 } else {
                     try {
@@ -299,90 +364,42 @@ public class ConsultarLocaisController {
                 }
             }
             if (rdbPessoaResponsavel.isSelected()) {
-                Local local = new Local();
-                local.setResponsavel(txtBuscador.getText());
-                completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorPessoaResponsavel(local));
+
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Local local = new Local();
+                        local.setResponsavel(txtBuscador.getText());
+                        completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorPessoaResponsavel(local));
+                    }
+                }.start();
+
             }
             if (rdbDescricao.isSelected()) {
-                Local local = new Local();
-                local.setDescricao(txtBuscador.getText());
-                completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorDescricao(local));
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Local local = new Local();
+                        local.setDescricao(txtBuscador.getText());
+                        completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorDescricao(local));
+                    }
+                }.start();
+
             }
         }
+    }
+
+    @FXML
+    void btnBuscar_OnAction(ActionEvent event) {
+
+        buscar();
     }
 
     @FXML
     void btnBuscar_OnKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
 
-            if (!cbmDepartamento.getValue().equals("TODOS")) {
-
-                if (rdbNumero.isSelected()) {
-                    Local local = new Local();
-                    char buscar[] = txtBuscador.getText().toCharArray();
-
-                    if (Validar.isDigit(buscar)) {
-                        if (txtBuscador.getText().isEmpty()) {
-                            listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarTodos());
-                        } else {
-
-                            local.setNumero(Integer.parseInt(txtBuscador.getText()));
-                            listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorNumero(local));
-                        }
-                    } else {
-                        try {
-                            LerMessage ler = new LerMessage();
-                            Alertas aviso = new Alertas();
-                            aviso.alerta(Alert.AlertType.ERROR, ler.getMessage("msg.incompatibilidade.numero"), ler.getMessage("msg.incompatibilidade.numero"));
-                        } catch (Exception ex) {
-                            System.out.println(ex.getMessage());
-                        }
-                    }
-                }
-                if (rdbPessoaResponsavel.isSelected()) {
-                    Local local = new Local();
-                    local.setResponsavel(txtBuscador.getText());
-                    listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorPessoaResponsavel(local));
-                }
-                if (rdbDescricao.isSelected()) {
-                    Local local = new Local();
-                    local.setDescricao(txtBuscador.getText());
-                    listarDepartamento(NegociosEstaticos.getNegocioLocal().buscarPorDescricao(local));
-                }
-            } else {
-                if (rdbNumero.isSelected()) {
-                    Local local = new Local();
-                    char buscar[] = txtBuscador.getText().toCharArray();
-
-                    if (Validar.isDigit(buscar)) {
-                        if (txtBuscador.getText().isEmpty()) {
-                            completarTabela(NegociosEstaticos.getNegocioLocal().buscarTodos());
-                        } else {
-
-                            local.setNumero(Integer.parseInt(txtBuscador.getText()));
-                            completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorNumero(local));
-                        }
-                    } else {
-                        try {
-                            LerMessage ler = new LerMessage();
-                            Alertas aviso = new Alertas();
-                            aviso.alerta(Alert.AlertType.ERROR, ler.getMessage("msg.incompatibilidade.numero"), ler.getMessage("msg.incompatibilidade.numero"));
-                        } catch (Exception ex) {
-                            System.out.println(ex.getMessage());
-                        }
-                    }
-                }
-                if (rdbPessoaResponsavel.isSelected()) {
-                    Local local = new Local();
-                    local.setResponsavel(txtBuscador.getText());
-                    completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorPessoaResponsavel(local));
-                }
-                if (rdbDescricao.isSelected()) {
-                    Local local = new Local();
-                    local.setDescricao(txtBuscador.getText());
-                    completarTabela(NegociosEstaticos.getNegocioLocal().buscarPorDescricao(local));
-                }
-            }
+            buscar();
 
         }
     }
@@ -395,6 +412,13 @@ public class ConsultarLocaisController {
     }
 
     void completarTabela(List<Local> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<Local> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
             dado.add(lista.get(i));
@@ -552,7 +576,7 @@ public class ConsultarLocaisController {
                 Alertas alert = new Alertas();
                 LerMessage ler = new LerMessage();
                 if (alert.alerta(Alert.AlertType.CONFIRMATION, "Remoção", ler.getMessage("msg.temcerteza"), "Sim", "Não")) {
-                //    if(NegociosEstaticos.getNegocioEstoqueMateria().g)
+                    //    if(NegociosEstaticos.getNegocioEstoqueMateria().g)
                     NegociosEstaticos.getNegocioLocal().remover(tblPrincipal.getSelectionModel().getSelectedItem());
                     completarTabela(NegociosEstaticos.getNegocioLocal().buscarTodos());
                 }

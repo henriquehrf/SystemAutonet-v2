@@ -17,12 +17,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -33,6 +35,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Departamento;
@@ -79,23 +82,57 @@ public class ConsultarDepartamentoController {
     @FXML
     private ToggleGroup FIltro;
 
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
+
     // private NegocioDepartamento negocioD;
     public void initialize() {
         //  negocioD = new NegocioDepartamento();
-        List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarTodos();
 
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 txtBuscador.requestFocus();
+                tableLoading(true);
             }
         });
         rdbNome.setSelected(true);
-        completarTabela(lista);
+        new Thread() {
+            @Override
+            public void run() {
+                List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarTodos();
+                completarTabela(lista);
+            }
+        }.start();
 
     }
 
     void completarTabela(List<Departamento> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<Departamento> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
             dado.add(lista.get(i));
@@ -180,7 +217,7 @@ public class ConsultarDepartamentoController {
             if (alert.alerta(Alert.AlertType.CONFIRMATION, "Remoção", ler.getMessage("msg.temcerteza"), "Sim", "Não")) {
                 Local aux = new Local();
                 aux.setId_departamento(tblPrincipal.getSelectionModel().getSelectedItem());
-                if (NegociosEstaticos.getNegocioLocal().buscarPorDepartamento(aux).size()==0) {
+                if (NegociosEstaticos.getNegocioLocal().buscarPorDepartamento(aux).size() == 0) {
 
                     NegociosEstaticos.getNegocioDepartamento().remover(tblPrincipal.getSelectionModel().getSelectedItem());
                     completarTabela(NegociosEstaticos.getNegocioDepartamento().buscarTodos());
@@ -197,21 +234,37 @@ public class ConsultarDepartamentoController {
         }
     }
 
-    @FXML
-    void btnBuscar_OnAction(ActionEvent event) {
+    void busca() {
         if (rdbNome.isSelected()) {
-            Departamento p = new Departamento();
-            p.setNome(txtBuscador.getText());
-            List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarPorNome(p);
-            completarTabela(lista);
+            new Thread() {
+                @Override
+                public void run() {
+                    Departamento p = new Departamento();
+                    p.setNome(txtBuscador.getText());
+                    List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarPorNome(p);
+                    completarTabela(lista);
+                }
+            }.start();
+
         }
 
         if (rdbSigla.isSelected()) {
-            Departamento p = new Departamento();
-            p.setSigla(txtBuscador.getText());
-            List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarPorSigla(p);
-            completarTabela(lista);
+            new Thread() {
+                @Override
+                public void run() {
+                    Departamento p = new Departamento();
+                    p.setSigla(txtBuscador.getText());
+                    List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarPorSigla(p);
+                    completarTabela(lista);
+                }
+            }.start();
+
         }
+    }
+
+    @FXML
+    void btnBuscar_OnAction(ActionEvent event) {
+        busca();
     }
 
     @FXML
@@ -231,19 +284,7 @@ public class ConsultarDepartamentoController {
     void txtBuscadorOnKeyPressed(KeyEvent event) {
 
         if (event.getCode() == KeyCode.ENTER) {
-            if (rdbNome.isSelected()) {
-                Departamento p = new Departamento();
-                p.setNome(txtBuscador.getText());
-                List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarPorNome(p);
-                completarTabela(lista);
-            }
-
-            if (rdbSigla.isSelected()) {
-                Departamento p = new Departamento();
-                p.setSigla(txtBuscador.getText());
-                List<Departamento> lista = NegociosEstaticos.getNegocioDepartamento().buscarPorSigla(p);
-                completarTabela(lista);
-            }
+            busca();
         }
 
     }
@@ -345,7 +386,7 @@ public class ConsultarDepartamentoController {
                 if (alert.alerta(Alert.AlertType.CONFIRMATION, "Remoção", ler.getMessage("msg.temcerteza"), "Sim", "Não")) {
                     Local aux = new Local();
                     aux.setId_departamento(tblPrincipal.getSelectionModel().getSelectedItem());
-                     if (NegociosEstaticos.getNegocioLocal().buscarPorDepartamento(aux).size()==0) {
+                    if (NegociosEstaticos.getNegocioLocal().buscarPorDepartamento(aux).size() == 0) {
 
                         NegociosEstaticos.getNegocioDepartamento().remover(tblPrincipal.getSelectionModel().getSelectedItem());
                         completarTabela(NegociosEstaticos.getNegocioDepartamento().buscarTodos());

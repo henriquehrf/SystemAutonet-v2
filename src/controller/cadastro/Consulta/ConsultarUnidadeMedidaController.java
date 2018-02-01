@@ -17,12 +17,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -32,6 +34,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import negocio.NegocioTipoUnidade;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
@@ -76,17 +79,45 @@ public class ConsultarUnidadeMedidaController {
     @FXML
     private Button btnBuscar;
 
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
+
     public void initialize() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
 
                 txtBuscador.requestFocus();
+                tableLoading(true);
             }
         });
-        // negocioTU = new NegocioTipoUnidade();
-        List<TipoUnidade> lista = NegociosEstaticos.getNegocioTipoUnidade().buscarTodos();
-        completarTabela(lista);
+
+        new Thread() {
+            @Override
+            public void run() {
+                List<TipoUnidade> lista = NegociosEstaticos.getNegocioTipoUnidade().buscarTodos();
+                completarTabela(lista);
+            }
+        }.start();
+
         rdbdescricao.setSelected(true);
     }
 
@@ -160,22 +191,43 @@ public class ConsultarUnidadeMedidaController {
         }
     }
 
-    @FXML
-    void btnBuscar_OnAction(ActionEvent event) {
+    void buscar() {
 
         if (rdbdescricao.isSelected()) {
-            TipoUnidade tu = new TipoUnidade();
-            tu.setDescricao(txtBuscador.getText());
-            completarTabela(NegociosEstaticos.getNegocioTipoUnidade().buscarPorDescricao(tu));
+            new Thread() {
+                @Override
+                public void run() {
+                    TipoUnidade tu = new TipoUnidade();
+                    tu.setDescricao(txtBuscador.getText());
+                    completarTabela(NegociosEstaticos.getNegocioTipoUnidade().buscarPorDescricao(tu));
+                }
+            }.start();
         }
         if (rdbsigla.isSelected()) {
-            TipoUnidade tu = new TipoUnidade();
-            tu.setSigla(txtBuscador.getText());
-            completarTabela(NegociosEstaticos.getNegocioTipoUnidade().buscarPorSigla(tu));
+            new Thread() {
+                @Override
+                public void run() {
+                    TipoUnidade tu = new TipoUnidade();
+                    tu.setSigla(txtBuscador.getText());
+                    completarTabela(NegociosEstaticos.getNegocioTipoUnidade().buscarPorSigla(tu));
+
+                }
+            }.start();
         }
     }
 
+    @FXML
+    void btnBuscar_OnAction(ActionEvent event) {
+        buscar();
+    }
+
     private void completarTabela(List<TipoUnidade> lista) {
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<TipoUnidade> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
             dado.add(lista.get(i));
@@ -206,16 +258,7 @@ public class ConsultarUnidadeMedidaController {
     @FXML
     void btnBuscar_OnKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            if (rdbdescricao.isSelected()) {
-                TipoUnidade tu = new TipoUnidade();
-                tu.setDescricao(txtBuscador.getText());
-                completarTabela(NegociosEstaticos.getNegocioTipoUnidade().buscarPorDescricao(tu));
-            }
-            if (rdbsigla.isSelected()) {
-                TipoUnidade tu = new TipoUnidade();
-                tu.setSigla(txtBuscador.getText());
-                completarTabela(NegociosEstaticos.getNegocioTipoUnidade().buscarPorSigla(tu));
-            }
+            buscar();
         }
     }
 

@@ -16,12 +16,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -31,6 +33,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Fornecedor;
@@ -85,24 +88,57 @@ public class ConsultarFornecedorController {
     @FXML
     private Button btnBuscar;
 
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
+
     //  private NegocioFornecedor negocioF;
     public void initialize() {
         // negocioF = new NegocioFornecedor();
 
         rdbNomeFantasia.setSelected(true);
-        List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarTodos();
-        completarTabela(lista);
+        new Thread() {
+            @Override
+            public void run() {
+                List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarTodos();
+                completarTabela(lista);
+            }
+        }.start();
 
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 txtBuscador.requestFocus();
+                tableLoading(true);
             }
         });
 
     }
 
     void completarTabela(List<Fornecedor> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
 
         ObservableList<Fornecedor> dado = FXCollections.observableArrayList();
 
@@ -234,44 +270,7 @@ public class ConsultarFornecedorController {
 
     @FXML
     void btnBuscar_OnAction(ActionEvent event) {
-        if (rdbCNPJ.isSelected()) {
-
-            char buscar[] = txtBuscador.getText().toCharArray();
-
-            if (Validar.isDigit(buscar)) {
-                Fornecedor f = new Fornecedor();
-                f.setCnpj(txtBuscador.getText());
-                List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorCnpj(f);
-                completarTabela(lista);
-            } else {
-                try {
-                    IncompatibilidadeNumero();
-                } catch (Exception ex) {
-                    System.out.println(ex.getMessage());
-                }
-            }
-
-        }
-        if (rdbNomeFantasia.isSelected()) {
-            Fornecedor f = new Fornecedor();
-            f.setNome_fantasia(txtBuscador.getText());
-            List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorNomeFantasia(f);
-            completarTabela(lista);
-
-        }
-        if (rdbPessoaResponsavel.isSelected()) {
-            Fornecedor f = new Fornecedor();
-            f.setPessoa_responsavel(txtBuscador.getText());
-            List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorPessoaResponsavel(f);
-            completarTabela(lista);
-
-        }
-        if (rdbRazaoSocial.isSelected()) {
-            Fornecedor f = new Fornecedor();
-            f.setRazao_social(txtBuscador.getText());
-            List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorRazaoSocial(f);
-            completarTabela(lista);
-        }
+        buscar();
     }
 
     private void IncompatibilidadeNumero() throws Exception {
@@ -327,47 +326,73 @@ public class ConsultarFornecedorController {
 
     }
 
+    void buscar() {
+        if (rdbCNPJ.isSelected()) {
+
+            new Thread() {
+                @Override
+                public void run() {
+                    char buscar[] = txtBuscador.getText().toCharArray();
+
+                    if (Validar.isDigit(buscar)) {
+                        Fornecedor f = new Fornecedor();
+                        f.setCnpj(txtBuscador.getText());
+                        List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorCnpj(f);
+                        completarTabela(lista);
+                    } else {
+                        try {
+                            IncompatibilidadeNumero();
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                        }
+                    }
+                }
+            }.start();
+
+        }
+        if (rdbNomeFantasia.isSelected()) {
+
+            new Thread() {
+                @Override
+                public void run() {
+                    Fornecedor f = new Fornecedor();
+                    f.setNome_fantasia(txtBuscador.getText());
+                    List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorNomeFantasia(f);
+                    completarTabela(lista);
+                }
+            }.start();
+
+        }
+        if (rdbPessoaResponsavel.isSelected()) {
+            new Thread() {
+                @Override
+                public void run() {
+                    Fornecedor f = new Fornecedor();
+                    f.setPessoa_responsavel(txtBuscador.getText());
+                    List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorPessoaResponsavel(f);
+                    completarTabela(lista);
+                }
+            }.start();
+
+        }
+        if (rdbRazaoSocial.isSelected()) {
+            new Thread() {
+                @Override
+                public void run() {
+                    Fornecedor f = new Fornecedor();
+                    f.setRazao_social(txtBuscador.getText());
+                    List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorRazaoSocial(f);
+                    completarTabela(lista);
+                }
+            }.start();
+
+        }
+    }
+
     @FXML
     void btnBuscarOnKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            if (rdbCNPJ.isSelected()) {
-
-                char buscar[] = txtBuscador.getText().toCharArray();
-
-                if (Validar.isDigit(buscar)) {
-                    Fornecedor f = new Fornecedor();
-                    f.setCnpj(txtBuscador.getText());
-                    List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorCnpj(f);
-                    completarTabela(lista);
-                } else {
-                    try {
-                        IncompatibilidadeNumero();
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                    }
-                }
-
-            }
-            if (rdbNomeFantasia.isSelected()) {
-                Fornecedor f = new Fornecedor();
-                f.setNome_fantasia(txtBuscador.getText());
-                List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorNomeFantasia(f);
-                completarTabela(lista);
-
-            }
-            if (rdbPessoaResponsavel.isSelected()) {
-                Fornecedor f = new Fornecedor();
-                f.setPessoa_responsavel(txtBuscador.getText());
-                List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorPessoaResponsavel(f);
-                completarTabela(lista);
-
-            }
-            if (rdbRazaoSocial.isSelected()) {
-                Fornecedor f = new Fornecedor();
-                f.setRazao_social(txtBuscador.getText());
-                List<Fornecedor> lista = NegociosEstaticos.getNegocioFornecedor().buscarPorRazaoSocial(f);
-                completarTabela(lista);
-            }
+            buscar();
         }
 
     }

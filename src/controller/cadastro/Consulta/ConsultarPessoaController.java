@@ -28,11 +28,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Pessoa;
@@ -87,8 +90,36 @@ public class ConsultarPessoaController {
     @FXML
     private RadioButton rdbCPF;
 
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
+
     //  NegocioPessoa pessoa;
     void completarTabela(List<Pessoa> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<Pessoa> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
             dado.add(lista.get(i));
@@ -144,12 +175,18 @@ public class ConsultarPessoaController {
             public void run() {
 
                 txtBuscador.requestFocus();
+                tableLoading(true);
             }
         });
-        // pessoa = new NegocioPessoa();
-        List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarTodos();
+        new Thread() {
+            @Override
+            public void run() {
+                List<Pessoa> lista = null;
+                completarTabela(NegociosEstaticos.getNegocioPessoa().buscarTodos());
+            }
+        }.start();
+
         rdbNome.setSelected(true);
-        completarTabela(lista);
 
     }
 
@@ -218,7 +255,7 @@ public class ConsultarPessoaController {
             LerMessage ler = new LerMessage();
             if (alert.alerta(Alert.AlertType.CONFIRMATION, "Remoção", ler.getMessage("msg.temcerteza"), "Sim", "Não")) {
                 NegociosEstaticos.getNegocioPessoa().remover(tblPrincipal.getSelectionModel().getSelectedItem());
-                 completarTabela(NegociosEstaticos.getNegocioPessoa().buscarTodos());
+                completarTabela(NegociosEstaticos.getNegocioPessoa().buscarTodos());
             }
         } catch (Exception ex) {
 
@@ -234,24 +271,34 @@ public class ConsultarPessoaController {
         }
     }
 
-    @FXML
-    void btnBuscarOnAction(ActionEvent event) {
+    void buscar() {
 
         if (rdbNome.isSelected()) {
             Pessoa p = new Pessoa();
             p.setNome(txtBuscador.getText());
-            List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorNome(p);
-            completarTabela(lista);
+            new Thread() {
+                @Override
+                public void run() {
+                    List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorNome(p);
+                    completarTabela(lista);
+                }
+            }.start();
 
         }
         if (rdbCPF.isSelected()) {
             char buscar[] = txtBuscador.getText().toCharArray();
 
             if (Validar.isDigit(buscar)) {
-                Pessoa p = new Pessoa();
-                p.setCpf(txtBuscador.getText());
-                List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorCPF(p);
-                completarTabela(lista);
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Pessoa p = new Pessoa();
+                        p.setCpf(txtBuscador.getText());
+                        List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorCPF(p);
+                        completarTabela(lista);
+                    }
+                }.start();
+
             } else {
                 try {
                     IncompatibilidadeNumero();
@@ -264,10 +311,16 @@ public class ConsultarPessoaController {
         if (rdbRG.isSelected()) {
             char buscar[] = txtBuscador.getText().toCharArray();
             if (Validar.isDigit(buscar)) {
-                Pessoa p = new Pessoa();
-                p.setRg(txtBuscador.getText());
-                List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorRG(p);
-                completarTabela(lista);
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Pessoa p = new Pessoa();
+                        p.setRg(txtBuscador.getText());
+                        List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorRG(p);
+                        completarTabela(lista);
+                    }
+                }.start();
+
             } else {
                 try {
                     IncompatibilidadeNumero();
@@ -280,11 +333,17 @@ public class ConsultarPessoaController {
         if (rgbNumMatricula.isSelected()) {
             char buscar[] = txtBuscador.getText().toCharArray();
             if (Validar.isDigit(buscar)) {
+                new Thread() {
+                    @Override
+                    public void run() {
 
-                Pessoa p = new Pessoa();
-                p.setNum_matricula(txtBuscador.getText());
-                List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorMatricula(p);
-                completarTabela(lista);
+                        Pessoa p = new Pessoa();
+                        p.setNum_matricula(txtBuscador.getText());
+                        List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorMatricula(p);
+                        completarTabela(lista);
+
+                    }
+                }.start();
 
             } else {
                 try {
@@ -295,6 +354,12 @@ public class ConsultarPessoaController {
             }
 
         }
+    }
+
+    @FXML
+    void btnBuscarOnAction(ActionEvent event) {
+
+        buscar();
     }
 
     private void IncompatibilidadeNumero() throws Exception {
@@ -315,65 +380,7 @@ public class ConsultarPessoaController {
     @FXML
     void btnBuscar_OnKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-
-            if (rdbNome.isSelected()) {
-                Pessoa p = new Pessoa();
-                p.setNome(txtBuscador.getText());
-                List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorNome(p);
-                completarTabela(lista);
-
-            }
-            if (rdbCPF.isSelected()) {
-                char buscar[] = txtBuscador.getText().toCharArray();
-
-                if (Validar.isDigit(buscar)) {
-                    Pessoa p = new Pessoa();
-                    p.setCpf(txtBuscador.getText());
-                    List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorCPF(p);
-                    completarTabela(lista);
-                } else {
-                    try {
-                        IncompatibilidadeNumero();
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                    }
-                }
-
-            }
-            if (rdbRG.isSelected()) {
-                char buscar[] = txtBuscador.getText().toCharArray();
-                if (Validar.isDigit(buscar)) {
-                    Pessoa p = new Pessoa();
-                    p.setRg(txtBuscador.getText());
-                    List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorRG(p);
-                    completarTabela(lista);
-                } else {
-                    try {
-                        IncompatibilidadeNumero();
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                    }
-                }
-
-            }
-            if (rgbNumMatricula.isSelected()) {
-                char buscar[] = txtBuscador.getText().toCharArray();
-                if (Validar.isDigit(buscar)) {
-
-                    Pessoa p = new Pessoa();
-                    p.setNum_matricula(txtBuscador.getText());
-                    List<Pessoa> lista = NegociosEstaticos.getNegocioPessoa().buscarPorMatricula(p);
-                    completarTabela(lista);
-
-                } else {
-                    try {
-                        IncompatibilidadeNumero();
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                    }
-                }
-
-            }
+            buscar();
         }
     }
 

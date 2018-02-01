@@ -15,12 +15,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -29,6 +31,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.TipoSaida;
@@ -62,16 +65,43 @@ public class ConsultarTipoSaidaController {
     @FXML
     private Button btnBuscar;
 
-    // private NegocioTipoSaida negocioTS;
-    public void initialize() {
-        // negocioTS = new NegocioTipoSaida();
-        List<TipoSaida> lista = NegociosEstaticos.getNegocioTipoSaida().buscarTodos();
+    void tableLoading(Boolean value) {
 
-        completarTabela(lista);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
 
+    }
+
+    // private NegocioTipoSaida negocioTS;
+    public void initialize() {
+        // negocioTS = new NegocioTipoSaida();
+
+        new Thread() {
+            @Override
+            public void run() {
+                List<TipoSaida> lista = NegociosEstaticos.getNegocioTipoSaida().buscarTodos();
+                completarTabela(lista);
+            }
+        }.start();
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                tableLoading(true);
                 txtBuscador.requestFocus();
             }
         });
@@ -150,13 +180,18 @@ public class ConsultarTipoSaidaController {
     @FXML
     void btnBuscar_OnAction(ActionEvent event) {
 
-        TipoSaida tps = new TipoSaida();
-        tps.setDescricao(txtBuscador.getText());
-        completarTabela(NegociosEstaticos.getNegocioTipoSaida().buscarPorDescricao(tps));
+        buscar();
 
     }
 
     private void completarTabela(List<TipoSaida> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<TipoSaida> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
             dado.add(lista.get(i));
@@ -182,12 +217,22 @@ public class ConsultarTipoSaidaController {
 
     }
 
+    void buscar() {
+        new Thread() {
+            @Override
+            public void run() {
+                TipoSaida tps = new TipoSaida();
+                tps.setDescricao(txtBuscador.getText());
+                completarTabela(NegociosEstaticos.getNegocioTipoSaida().buscarPorDescricao(tps));
+            }
+        }.start();
+
+    }
+
     @FXML
     void btnBuscar_OnKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            TipoSaida tps = new TipoSaida();
-            tps.setDescricao(txtBuscador.getText());
-            completarTabela(NegociosEstaticos.getNegocioTipoSaida().buscarPorDescricao(tps));
+            buscar();
         }
     }
 

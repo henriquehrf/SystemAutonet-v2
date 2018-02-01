@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -23,6 +24,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -31,6 +33,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Categoria;
@@ -82,17 +85,44 @@ public class ConsultarMaterialController {
 
     List<Material> cacheList = null;
 
-    void completarCombo() {
-        List<Categoria> lista = NegociosEstaticos.getNegocioCategoria().bucarTodos();
-        ObservableList<String> dado = FXCollections.observableArrayList();
+    void completarCombo(List<Categoria> lista) {
 
-        for (int i = 0; i < lista.size(); i++) {
-            dado.add(lista.get(i).getDescricao());
-        }
-        dado.add("TODOS");
-        Collections.sort(dado);
-        cmbCategoria.setItems(dado);
-        cmbCategoria.setValue("TODOS");
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ObservableList<String> dado = FXCollections.observableArrayList();
+
+                for (int i = 0; i < lista.size(); i++) {
+                    dado.add(lista.get(i).getDescricao());
+                }
+                dado.add("TODOS");
+                Collections.sort(dado);
+                cmbCategoria.setItems(dado);
+                cmbCategoria.setValue("TODOS");
+            }
+        });
+
+    }
+
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
     }
 
     public void initialize() {
@@ -103,7 +133,8 @@ public class ConsultarMaterialController {
             @Override
             public void run() {
                 txtBuscador.requestFocus();
-                completarCombo();
+
+                tableLoading(true);
             }
         });
 
@@ -112,6 +143,7 @@ public class ConsultarMaterialController {
             public void run() {
 
                 cacheList = NegociosEstaticos.getNegocioMaterial().buscarTodos();
+                completarCombo(NegociosEstaticos.getNegocioCategoria().bucarTodos());
                 completarTabela(cacheList);
             }
         }.start();
@@ -167,11 +199,12 @@ public class ConsultarMaterialController {
     void cmbCategoria_OnAction(ActionEvent event) {
 
         if (cmbCategoria.getValue().equals("TODOS")) {
-            btnBusca_OnAction(event);
+            buscaMaterial();
             // completarTabela(NegociosEstaticos.getNegocioMaterial().buscarTodos());
         } else {
-            btnBusca_OnAction(event);
-            CategoriaFilter(tblPrincipal.getItems());
+             buscaMaterial();
+            System.out.println("Passei aqui");
+           // CategoriaFilter(tblPrincipal.getItems());
         }
     }
 
@@ -183,6 +216,7 @@ public class ConsultarMaterialController {
                 aux.add(lista.get(i));
             }
         }
+        cacheList=aux;
         completarTabela(aux);
 
     }
@@ -299,6 +333,12 @@ public class ConsultarMaterialController {
     void completarTabela(List<Material> lista) {
 
         lista = qtdFilter(Integer.parseInt(txtQuantidade.getText()));
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
 
         ObservableList<Material> dado = FXCollections.observableArrayList();
         dado.addAll(lista);

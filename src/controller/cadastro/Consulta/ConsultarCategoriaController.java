@@ -22,12 +22,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -36,6 +38,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
 import utilitarios.LerMessage;
 import vo.Categoria;
@@ -72,6 +75,27 @@ public class ConsultarCategoriaController {
 
     @FXML
     private Button btnBuscar;
+
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipal.setPlaceholder(h);
+                } else {
+                    tblPrincipal.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
 
     @FXML
     void btnVoltar_OnAction(ActionEvent event) {
@@ -156,7 +180,7 @@ public class ConsultarCategoriaController {
 
                 if (alert.alerta(Alert.AlertType.CONFIRMATION, "Remoção", ler.getMessage("msg.temcerteza"), "Sim", "Não")) {
                     Categoria cat = new Categoria();
-                   cat.setId_categoria(tblPrincipal.getSelectionModel().getSelectedItem().getId());
+                    cat.setId_categoria(tblPrincipal.getSelectionModel().getSelectedItem().getId());
                     if (NegociosEstaticos.getNegocioMaterial().buscarPorCategoria(cat).size() == 0) {
                         NegociosEstaticos.getNegocioCategoria().remover(tblPrincipal.getSelectionModel().getSelectedItem());
                         completarTabela(NegociosEstaticos.getNegocioCategoria().bucarTodos());
@@ -249,18 +273,29 @@ public class ConsultarCategoriaController {
         }
     }
 
+    void buscar() {
+        new Thread() {
+            @Override
+            public void run() {
+                Categoria cat = new Categoria();
+                cat.setDescricao(txtBuscador.getText());
+                completarTabela(NegociosEstaticos.getNegocioCategoria().buscarPorDescricao(cat));
+            }
+        }.start();
+
+    }
+
     @FXML
     void btnBuscar_OnAction(ActionEvent event) {
-        Categoria cat = new Categoria();
-        cat.setDescricao(txtBuscador.getText());
-        completarTabela(NegociosEstaticos.getNegocioCategoria().buscarPorDescricao(cat));
+        buscar();
     }
 
     @FXML
     void btnBuscar_OnActionKey(KeyEvent event) {
-        Categoria cat = new Categoria();
-        cat.setDescricao(txtBuscador.getText());
-        completarTabela(NegociosEstaticos.getNegocioCategoria().buscarPorDescricao(cat));
+        if (event.getCode() == KeyCode.ENTER) {
+            buscar();
+        }
+
     }
 
     @FXML
@@ -303,15 +338,26 @@ public class ConsultarCategoriaController {
             @Override
             public void run() {
                 txtBuscador.requestFocus();
+                tableLoading(true);
             }
         });
+        new Thread() {
+            @Override
+            public void run() {
+                List<Categoria> lista = NegociosEstaticos.getNegocioCategoria().bucarTodos();
+                completarTabela(lista);
+            }
+        }.start();
 
-        List<Categoria> lista = NegociosEstaticos.getNegocioCategoria().bucarTodos();
-
-        completarTabela(lista);
     }
 
     private void completarTabela(List<Categoria> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
 
         ObservableList<Categoria> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
@@ -328,6 +374,7 @@ public class ConsultarCategoriaController {
         };
         Collections.sort(dado, cmp);
         this.tblPrincipal.setItems(dado);
+        tblPrincipal.refresh();
 
     }
 
