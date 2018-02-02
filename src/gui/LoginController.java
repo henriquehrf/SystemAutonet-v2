@@ -9,30 +9,19 @@ import classesAuxiliares.ClasseDoSistemaEstatico;
 import classesAuxiliares.NegociosEstaticos;
 import controller.PrincipalController;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import utilitarios.Criptografia;
 import vo.Pessoa;
 
@@ -117,10 +106,15 @@ public class LoginController {
             }
 
         } catch (Exception ex) {
-            lblautenticacao.setText("Usuário Inválido");
-            labelUsuarioAlerta.setVisible(true);
-            lblautenticacao.setVisible(true);
-            System.out.println("erro");
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    lblautenticacao.setText("Não há conexão com a base de dados");
+                    labelUsuarioAlerta.setVisible(true);
+                    lblautenticacao.setVisible(true);
+                }
+            });
+
             System.out.println(ex.getMessage());
         }
         return false;
