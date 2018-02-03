@@ -8,6 +8,7 @@ package controller.emprestimo.solicita;
 import classesAuxiliares.ClasseDoSistemaEstatico;
 import classesAuxiliares.NegociosEstaticos;
 import controller.PrincipalController;
+import controller.cadastro.Consulta.ConsultarUnidadeMedidaController;
 import enumm.PerfilUsuario;
 import enumm.StatusEmprestimo;
 import gui.SystemAutonet;
@@ -164,40 +165,44 @@ public class SolicitaEmprestimoController {
 
     }
 
-    void solicitar() {
-        new Thread() {
-            @Override
-            public void run() {
-                Date data = new Date();
-                Emprestimo emp = new Emprestimo();
-                Instant instant = dtpDataEmprestimo.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
-                emp.setDt_emprestimo(Date.from(instant));
-                emp.setFinalidade(txtFinalidade.getText());
-                emp.setObservacao(txtObservacao.getText());
-                emp.setStatus_emprestimo(StatusEmprestimo.ESPERANDO_ANALISE);
-                emp.setId_pessoa_solicita(ClasseDoSistemaEstatico.getPessoa());
-                try {
-                    emp = NegociosEstaticos.getNegocioEmprestimo().salvar(emp);
-                } catch (Exception ex) {
-                    System.out.println(ex.getMessage());
-                }
-                for (int i = 0; i < altertab.size(); i++) {
-                    EmprestimoEstoqueMaterial eem = new EmprestimoEstoqueMaterial();
-                    eem.setId_emprestimo(emp);
-                    eem.setQtd_emprestada(altertab.get(i).getQuantidadeSolicitada());
-                    eem.setQtd_devolvida(0);
-                    eem.setId_material(altertab.get(i));
-                    try {
-                        NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(eem);
-                        eem = null;
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                    }
+    Boolean solicitar() {
 
-                }
-                emp = null;
+        Date data = new Date();
+        Emprestimo emp = new Emprestimo();
+        Instant instant = dtpDataEmprestimo.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
+        emp.setDt_emprestimo(Date.from(instant));
+        emp.setFinalidade(txtFinalidade.getText());
+        emp.setObservacao(txtObservacao.getText());
+        emp.setStatus_emprestimo(StatusEmprestimo.ESPERANDO_ANALISE);
+        emp.setId_pessoa_solicita(ClasseDoSistemaEstatico.getPessoa());
+        try {
+            emp = NegociosEstaticos.getNegocioEmprestimo().salvar(emp);
+        } catch (Exception ex) {
+            Alertas alert = new Alertas();
+            alert.alerta(Alert.AlertType.ERROR, "Ops, houve um erro na solicitação de empréstimo", ex.getMessage());
+            System.out.println(ex.getMessage());
+            return false;
+        }
+        for (int i = 0; i < altertab.size(); i++) {
+            EmprestimoEstoqueMaterial eem = new EmprestimoEstoqueMaterial();
+            eem.setId_emprestimo(emp);
+            eem.setQtd_emprestada(altertab.get(i).getQuantidadeSolicitada());
+            eem.setQtd_devolvida(0);
+            eem.setId_material(altertab.get(i));
+            try {
+                NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(eem);
+                eem = null;
+
+            } catch (Exception ex) {
+                Alertas alert = new Alertas();
+                alert.alerta(Alert.AlertType.ERROR, "Ops, houve um erro na solicitação de empréstimo", ex.getMessage());
+                System.out.println(ex.getMessage());
+                return false;
             }
-        }.start();
+
+        }
+        emp = null;
+        return true;
 
     }
 
@@ -206,13 +211,20 @@ public class SolicitaEmprestimoController {
         if (txtFinalidade.getText().isEmpty()) {
             finalidadeObrigatorio.setVisible(true);
             return false;
+        }else{
+             finalidadeObrigatorio.setVisible(false);
         }
         if (dtpDataEmprestimo.getValue() == null) {
             dataObrigatorio.setVisible(true);
             return false;
+        }else{
+             dataObrigatorio.setVisible(false);
         }
         if (tblListaMateriais.getItems().size() == 0) {
+            tblListaMateriais.setStyle("-fx-border-color:red;");
             return false;
+        }else{
+            tblListaMateriais.setStyle("-fx-border-color:darkgrey;");
         }
 
         return true;
@@ -222,8 +234,11 @@ public class SolicitaEmprestimoController {
         htmlTable += "<tr><td>" + quantidade + "</td><td>" + material + " </td> <td>" + categoria + "</td></tr>";
     }
 
-    void enviarEmail() {
+    void enviarEmail(Boolean isSaved) {
 
+        if (!isSaved) {
+            return;
+        }
         new Thread() {
             @Override
             public void run() {
@@ -277,8 +292,36 @@ public class SolicitaEmprestimoController {
 
     }
 
-    void gerarRelatorio() {
+    void reset() {
+        try {
+            Parent root;
+            root = FXMLLoader.load(SolicitaEmprestimoController.class.getClassLoader().getResource("fxml/emprestimo/Solicitar/SolicitaEmprestimo.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
+            SystemAutonet.SCENE.setRoot(root);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
 
+    void voltar() {
+        try {
+            Parent root;
+            root = FXMLLoader.load(PrincipalController.class.getClassLoader().getResource("fxml/Principal.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
+            SystemAutonet.SCENE.setRoot(root);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    Boolean novoRegistro() {
+        Alertas alert = new Alertas();
+        return alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando confirmação do usuário", "Deseja realizar um nova solicitação de empréstimo?", "Sim", "Não");
+    }
+
+    void gerarRelatorio(Boolean isSaved) {
+
+        if (!isSaved) {
+            return;
+        }
         Alertas alert = new Alertas();
         Boolean result = alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja gerar um PDF da solicitação de empréstimo?", "Sim", "Não");
 
@@ -287,38 +330,50 @@ public class SolicitaEmprestimoController {
             Stage stage = new Stage();
             File selectedDirectory = directoryChooser.showDialog(stage);
             if (selectedDirectory != null) {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        String pattern = "dd/MM/yyyy";
-                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-                        GerarPDF pdf = new GerarPDF();
-                        pdf.solicitarEmprestimo(selectedDirectory.getAbsolutePath(), tblListaMateriais.getItems(), txtFinalidade.getText(), dateFormatter.format(dtpDataEmprestimo.getValue()).toString(), txtObservacao.getText(), ClasseDoSistemaEstatico.getPessoa());
+                String pattern = "dd/MM/yyyy";
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+                GerarPDF pdf = new GerarPDF();
+                try {
+                    pdf.solicitarEmprestimo(selectedDirectory.getAbsolutePath(), tblListaMateriais.getItems(), txtFinalidade.getText().toUpperCase(), dateFormatter.format(dtpDataEmprestimo.getValue()).toString(), txtObservacao.getText().toUpperCase(), ClasseDoSistemaEstatico.getPessoa());
+                    if (!novoRegistro()) {
+                        voltar();
+                    } else {
+                        reset();
                     }
-                }.start();
+
+                } catch (Exception ex) {
+                    alert.alerta(Alert.AlertType.ERROR, "Erro ao gerar o PDF", ex.getMessage());
+                    gerarRelatorio(true);
+                }
+
             } else {
-                //labelSelectedDirectory.setText(selectedDirectory.getAbsolutePath());
+                if (!novoRegistro()) {
+                    voltar();
+                } else {
+                    reset();
+                }
+            }
+        } else {
+            if (!novoRegistro()) {
+                voltar();
+            } else {
+                reset();
             }
         }
+
     }
 
     @FXML
     void btnSolicitarOnAction(ActionEvent event) {
 
         if (validar()) {
-            solicitar();
-            enviarEmail();
-            gerarRelatorio();
+            Boolean isSaved = solicitar();
+            enviarEmail(isSaved);
+            gerarRelatorio(isSaved);
         } else {
+            Alertas alert = new Alertas();
+            alert.alerta(Alert.AlertType.ERROR, "Erro ao solicitar empréstimo", "Há campos obrigatórios que não foram preenchidos");
             System.out.println("Erro");
-        }
-
-        try {
-            Parent root;
-            root = FXMLLoader.load(PrincipalController.class.getClassLoader().getResource("fxml/Principal.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
-            SystemAutonet.SCENE.setRoot(root);
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
         }
 
     }
@@ -433,6 +488,7 @@ public class SolicitaEmprestimoController {
 
     @FXML
     void btnBuscarOnAction(ActionEvent event) {
+        
 
     }
 
