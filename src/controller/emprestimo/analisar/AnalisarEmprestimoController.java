@@ -5,6 +5,7 @@
  */
 package controller.emprestimo.analisar;
 
+import classesAuxiliares.ClasseDoSistemaEstatico;
 import classesAuxiliares.NegociosEstaticos;
 import classesAuxiliares.TblEmprestimoEstoque;
 import classesAuxiliares.TblPessoaEmprestimo;
@@ -25,12 +26,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
+import vo.EntradaMaterial;
+import vo.Material;
 import vo.Pessoa;
 
 /**
@@ -56,7 +60,7 @@ public class AnalisarEmprestimoController implements Initializable {
     private TableView<TblPessoaEmprestimo> tblAguardandoAnalise;
 
     @FXML
-    private TableColumn<?, ?> tbcDisponibilidadeAnalise;
+    private TableColumn<Material, String> tbcDisponibilidadeAnalise;
 
     @FXML
     private TableColumn<?, ?> tbcQuantidadeSolicitadaSeparado;
@@ -101,7 +105,7 @@ public class AnalisarEmprestimoController implements Initializable {
     private TableColumn<TblPessoaEmprestimo, String> tbcDtEmprestimo;
 
     @FXML
-    private TableColumn<?, ?> tbcMaterialAnalise;
+    private TableColumn<Material, String> tbcMaterialAnalise;
 
     @FXML
     private Label lblDtEmprestimo;
@@ -125,7 +129,7 @@ public class AnalisarEmprestimoController implements Initializable {
     private Button btnVoltarLista;
 
     @FXML
-    private TableColumn<?, ?> tbcCategoriaAnalise;
+    private TableColumn<Material, String> tbcCategoriaAnalise;
 
     @FXML
     private Label lblFinalidade;
@@ -143,7 +147,7 @@ public class AnalisarEmprestimoController implements Initializable {
     private TableColumn<?, ?> tbcDescricaoBusca;
 
     @FXML
-    private TableColumn<?, ?> tbcQuantidadeAnalise;
+    private TableColumn<Material, Integer> tbcQuantidadeAnalise;
 
     @FXML
     private TableColumn<?, ?> tbcQuantidadeBusca;
@@ -154,17 +158,44 @@ public class AnalisarEmprestimoController implements Initializable {
     @FXML
     private Tab tabAnaliseEmprestimo;
 
+    @FXML
+    private TableView<Material> tblListaMaterial;
+
     List<TblPessoaEmprestimo> ListaOf = new ArrayList();
     List<TblEmprestimoEstoque> ListaPessoaMaterial = new ArrayList();
 
     @FXML
     void btnAnalisarOnAction(ActionEvent event) {
 
+        TblPessoaEmprestimo result = tblAguardandoAnalise.getSelectionModel().getSelectedItem();
+
+        List<EmprestimoEstoqueMaterial> emp = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarTodosIdEmprestimo(result.getEmprestimo());
+        List<Material> mat = NegociosEstaticos.getNegocioMaterial().buscarTodos();
+        List<Material> tblListaMaterial = new ArrayList<>();
+        for (Material vo : mat) {
+            for (EmprestimoEstoqueMaterial em : emp) {
+                if (vo.getId().equals(em.getId_material().getId())) {
+                    Material material = new Material();
+                    material = vo;
+                    material.setQuantidadeSolicitada(em.getQtd_emprestada());
+                    tblListaMaterial.add(material);
+                }
+            }
+        }
+        
+        lblDtEmprestimo.setText(result.getEmprestimoDt());
+        lblFinalidade.setText(result.getFinalidade());
+        lblObservacao.setText(result.getEmprestimo().getObservacao());
+        
+        
+        completarTblListaMaterial(tblListaMaterial);
+        tabAnaliseEmprestimo.setDisable(false);
+
     }
 
     @FXML
     void btnVoltarListaOnAction(ActionEvent event) {
-         try {
+        try {
             Parent root;
             root = FXMLLoader.load(PrincipalController.class.getClassLoader().getResource("fxml/Principal.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
             SystemAutonet.SCENE.setRoot(root);
@@ -223,6 +254,21 @@ public class AnalisarEmprestimoController implements Initializable {
 
     }
 
+    private void completarTblListaMaterial(List<Material> lista) {
+        ObservableList<Material> dado = FXCollections.observableArrayList();
+        dado.addAll(lista);
+
+        this.tbcMaterialAnalise.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
+        this.tbcQuantidadeAnalise.setCellValueFactory(new PropertyValueFactory<Material, Integer>("QuantidadeSolicitadaFormat"));
+        this.tbcCategoriaAnalise.setCellValueFactory(new PropertyValueFactory<Material, String>("CategoriaNome"));
+        this.tbcDisponibilidadeAnalise.setCellValueFactory(new PropertyValueFactory<Material, String>("QuantidadeDisponivelFormat"));
+
+        
+
+        this.tblListaMaterial.setItems(dado);
+
+    }
+
     private void completarTblAguardandoAnalise(List<TblPessoaEmprestimo> lista) {
 
         ObservableList<TblPessoaEmprestimo> dado = FXCollections.observableArrayList();
@@ -240,7 +286,7 @@ public class AnalisarEmprestimoController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         TabPanePrincipal.getSelectionModel().select(tabListaEmprestimo);
         tabListaEmprestimo.setDisable(false);
         tabAnaliseEmprestimo.setDisable(true);
@@ -248,25 +294,36 @@ public class AnalisarEmprestimoController implements Initializable {
         tabBuscarMaterial.setDisable(true);
         tabBuscarMaterial.setDisable(true);
 
-        List<EmprestimoEstoqueMaterial> empm = new ArrayList();
+        new Thread() {
+            @Override
+            public void run() {
 
-        List<Pessoa> listpessoa = NegociosEstaticos.getNegocioPessoa().buscarTodos();
-        for (Pessoa vo : listpessoa) {
-            List<Emprestimo> emp = NegociosEstaticos.getNegocioEmprestimo().buscarPorIdPessoaStatusESPERANDO_ANALISE(vo);
-            for (Emprestimo voEmp : emp) {
-                empm = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(voEmp);
-                if (empm.size() > 0) {
-                    TblPessoaEmprestimo tb = new TblPessoaEmprestimo();
-                    tb.setEmprestimo(voEmp);
-                    tb.setPessoa(vo);
-                    ListaOf.add(tb);
-                    // listEmprestimoNaoDevolvido.add(voEmp);
+                List<EmprestimoEstoqueMaterial> empm = new ArrayList();
 
+                List<Pessoa> listpessoa = NegociosEstaticos.getNegocioPessoa().buscarTodos();
+
+                for (Pessoa vo : listpessoa) {
+                    if (vo.getId() == ClasseDoSistemaEstatico.getPessoa().getId()) {
+                        listpessoa.remove(vo);
+                        break;
+                    }
                 }
+                for (Pessoa vo : listpessoa) {
+                    List<Emprestimo> emp = NegociosEstaticos.getNegocioEmprestimo().buscarPorIdPessoaStatusESPERANDO_ANALISE(vo);
+                    for (Emprestimo voEmp : emp) {
+                        empm = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(voEmp);
+                        if (empm.size() > 0) {
+                            TblPessoaEmprestimo tb = new TblPessoaEmprestimo();
+                            tb.setEmprestimo(voEmp);
+                            tb.setPessoa(vo);
+                            ListaOf.add(tb);
+                        }
+                    }
+                }
+                completarTblAguardandoAnalise(ListaOf);
             }
+        }.start();
 
-        }
-        completarTblAguardandoAnalise(ListaOf);
     }
 
 }

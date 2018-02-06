@@ -27,17 +27,19 @@ import javax.persistence.Transient;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "Material.consultarPorDescricao",
-            query = "select m from Material m where UPPER (m.descricao) like :descricao"),
+            query = "select m from Material m where UPPER (m.descricao) like :descricao")
+    ,
 
     @NamedQuery(name = "Material.consultarPorQuantidade",
-            query = "select m from Material m where m.quantidade = :quantidade"),
+            query = "select m from Material m where m.quantidade = :quantidade")
+    ,
 
     @NamedQuery(name = "Material.consultarPorCategoria",
-            query = "Select m from Material m where m.id_categoria.id_categoria = :idcategoria"),
+            query = "Select m from Material m where m.id_categoria.id_categoria = :idcategoria")
+    ,
 
     @NamedQuery(name = "Material.consultarTodos",
             query = "Select m from Material m ORDER BY (m.descricao)")
-    
 
 })
 public class Material implements Serializable, EntidadeBase {
@@ -73,7 +75,7 @@ public class Material implements Serializable, EntidadeBase {
 
     @Transient
     private String unidadeMedida;
-    
+
     @Transient
     private int QuantidadeSolicitada;
 
@@ -150,7 +152,15 @@ public class Material implements Serializable, EntidadeBase {
         this.politicaUso = politicaUso;
     }
 
-    public Number getQuantidadeDisponivel(){        
+    public String getQuantidadeDisponivelFormat() {
+        return quantidadeDisponivel + " " + unidadeMedida;
+    }
+
+    public String getQuantidadeSolicitadaFormat() {
+        return QuantidadeSolicitada + " " + unidadeMedida;
+    }
+
+    public Number getQuantidadeDisponivel() {
         return quantidadeDisponivel;
     }
 
@@ -166,5 +176,4 @@ public class Material implements Serializable, EntidadeBase {
         this.QuantidadeSolicitada = QuantidadeSolicitada;
     }
 
-    
 }

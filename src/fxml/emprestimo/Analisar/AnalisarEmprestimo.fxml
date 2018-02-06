@@ -72,7 +72,7 @@
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <center>
-                        <TableView prefHeight="310.0" prefWidth="778.0" BorderPane.alignment="CENTER">
+                        <TableView fx:id="tblListaMaterial" prefHeight="310.0" prefWidth="778.0" BorderPane.alignment="CENTER">
                            <columns>
                               <TableColumn fx:id="tbcMaterialAnalise" prefWidth="355.0" text="%tblColumn.Material" />
                               <TableColumn fx:id="tbcQuantidadeAnalise" prefWidth="96.0" text="%tblColumn.quantidade" />
