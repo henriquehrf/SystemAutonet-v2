@@ -19,6 +19,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +47,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import static javafx.scene.text.Font.font;
 import javafx.stage.DirectoryChooser;
@@ -211,19 +215,19 @@ public class SolicitaEmprestimoController {
         if (txtFinalidade.getText().isEmpty()) {
             finalidadeObrigatorio.setVisible(true);
             return false;
-        }else{
-             finalidadeObrigatorio.setVisible(false);
+        } else {
+            finalidadeObrigatorio.setVisible(false);
         }
         if (dtpDataEmprestimo.getValue() == null) {
             dataObrigatorio.setVisible(true);
             return false;
-        }else{
-             dataObrigatorio.setVisible(false);
+        } else {
+            dataObrigatorio.setVisible(false);
         }
         if (tblListaMateriais.getItems().size() == 0) {
             tblListaMateriais.setStyle("-fx-border-color:red;");
             return false;
-        }else{
+        } else {
             tblListaMateriais.setStyle("-fx-border-color:darkgrey;");
         }
 
@@ -251,7 +255,7 @@ public class SolicitaEmprestimoController {
 
                 conteudo += "<html><body>";
                 conteudo += "<p><b>USUÁRIO</b>: " + ClasseDoSistemaEstatico.getPessoa().getNome().toUpperCase() + "</p>";
-                conteudo += "<p><b>DATA DO EMPRÉSTIMO</b>: " + dateFormatter.format(dtpDataEmprestimo.getValue()) + "</p>";
+                conteudo += "<p><b>DATA PARA EMPRÉSTIMO</b>: " + dateFormatter.format(dtpDataEmprestimo.getValue()) + "</p>";
                 conteudo += "<p><b>FINALIDADE</b>: " + txtFinalidade.getText().toUpperCase() + "</p>";
                 conteudo += "<p><b>OBSERVAÇÃO</b>: " + txtObservacao.getText().toUpperCase() + "</p>";
                 conteudo += "<p align=\"center\"><b>LISTA DE MATERIAIS</b></p>";
@@ -302,7 +306,7 @@ public class SolicitaEmprestimoController {
         }
     }
 
-    void voltar() {
+    void cancelar() {
         try {
             Parent root;
             root = FXMLLoader.load(PrincipalController.class.getClassLoader().getResource("fxml/Principal.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
@@ -336,7 +340,7 @@ public class SolicitaEmprestimoController {
                 try {
                     pdf.solicitarEmprestimo(selectedDirectory.getAbsolutePath(), tblListaMateriais.getItems(), txtFinalidade.getText().toUpperCase(), dateFormatter.format(dtpDataEmprestimo.getValue()).toString(), txtObservacao.getText().toUpperCase(), ClasseDoSistemaEstatico.getPessoa());
                     if (!novoRegistro()) {
-                        voltar();
+                        cancelar();
                     } else {
                         reset();
                     }
@@ -348,14 +352,14 @@ public class SolicitaEmprestimoController {
 
             } else {
                 if (!novoRegistro()) {
-                    voltar();
+                    cancelar();
                 } else {
                     reset();
                 }
             }
         } else {
             if (!novoRegistro()) {
-                voltar();
+                cancelar();
             } else {
                 reset();
             }
@@ -363,9 +367,7 @@ public class SolicitaEmprestimoController {
 
     }
 
-    @FXML
-    void btnSolicitarOnAction(ActionEvent event) {
-
+    void solicitarMateriais() {
         if (validar()) {
             Boolean isSaved = solicitar();
             enviarEmail(isSaved);
@@ -375,36 +377,76 @@ public class SolicitaEmprestimoController {
             alert.alerta(Alert.AlertType.ERROR, "Erro ao solicitar empréstimo", "Há campos obrigatórios que não foram preenchidos");
             System.out.println("Erro");
         }
+    }
 
+    @FXML
+    void btnSolicitarOnKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            solicitarMateriais();
+        }
+    }
+
+    @FXML
+    void btnSolicitarOnAction(ActionEvent event) {
+
+        solicitarMateriais();
+
+    }
+
+    @FXML
+    void btnCancelarOnKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            cancelar();
+        }
     }
 
     @FXML
     void btnCancelarOnAction(ActionEvent event) {
+        cancelar();
+    }
 
-        try {
-            Parent root;
-            root = FXMLLoader.load(PrincipalController.class.getClassLoader().getResource("fxml/Principal.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
-            SystemAutonet.SCENE.setRoot(root);
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
+    void voltar() {
+        tabBuscarMaterial.setDisable(false);
+        tabListaMaterial.setDisable(true);
+        tabPanePrincipal.getSelectionModel().select(tabBuscarMaterial);
+    }
+
+    @FXML
+    void btnVoltarOnKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            voltar();
         }
-
     }
 
     @FXML
     void btnVoltarOnAction(ActionEvent event) {
+        voltar();
+    }
 
-        tabBuscarMaterial.setDisable(false);
-        tabListaMaterial.setDisable(true);
-        tabPanePrincipal.getSelectionModel().select(tabBuscarMaterial);
+    void adicionar() {
+        tabListaMaterial.setDisable(false);
+        tabPanePrincipal.getSelectionModel().select(tabListaMaterial);
+        tabBuscarMaterial.setDisable(true);
+    }
 
+    @FXML
+    void btnAdicionarMaterialKeyPressed(KeyEvent event) {
+        System.out.println("uai??");
+        if (event.getCode() == KeyCode.ENTER) {
+            if (set_quantidade()) {
+                tblListaMateriais.setItems(altertab);
+                completar_ListaMaterial(altertab);
+                btnVoltarOnKeyPressed(event);
+
+            } else {
+                return;
+            }
+        }
     }
 
     @FXML
     void btnAdicionarOnAction(ActionEvent event) {
-        tabListaMaterial.setDisable(false);
-        tabPanePrincipal.getSelectionModel().select(tabListaMaterial);
-        tabBuscarMaterial.setDisable(true);
+        adicionar();
 
     }
 
@@ -459,7 +501,6 @@ public class SolicitaEmprestimoController {
         } else {
             return;
         }
-        // altertab.add(tblBuscaMateriais.getSelectionModel().getSelectedItem());
 
     }
 
@@ -486,13 +527,45 @@ public class SolicitaEmprestimoController {
 
     }
 
+    void buscar() {
+        Material material = new Material();
+        material.setDescricao(txtBuscador.getText());
+        new Thread() {
+            @Override
+            public void run() {
+                List<Material> list;
+                if (!material.getDescricao().isEmpty()) {
+                    list = NegociosEstaticos.getNegocioMaterial().buscarPorDescricao(material);
+
+                } else {
+                    list = NegociosEstaticos.getNegocioMaterial().buscarTodos();
+                }
+                completarTabela(list);
+            }
+        }.start();
+    }
+
+    @FXML
+    void btnBuscarOnKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            buscar();
+        }
+    }
+
     @FXML
     void btnBuscarOnAction(ActionEvent event) {
-        
+
+        buscar();
 
     }
 
     private void completarTabela(List<Material> lista) {
+
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
 
         ObservableList<Material> dado = FXCollections.observableArrayList();
         for (int i = 0; i < lista.size(); i++) {
@@ -501,6 +574,23 @@ public class SolicitaEmprestimoController {
         this.tbcCategoriaBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, String>("CategoriaNome"));
         this.tbcMaterialBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
         this.tbcQuantidadeDisponivelBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, Number>("quantidade"));
+
+        Comparator<Material> cmp = new Comparator<Material>() {
+            @Override
+            public int compare(Material mat1, Material mat2) {
+                int x = mat1.getDescricao().compareTo(mat2.getDescricao());
+                if (x != 0) {
+                    return x;
+                } else {
+                    Integer x1 = ((Material) mat1).getQuantidade();
+                    Integer x2 = ((Material) mat2).getQuantidade();
+                    return x1.compareTo(x2);
+                }
+            }
+
+        };
+        Collections.sort(dado, cmp);
+
         this.tblBuscaMateriais.setItems(dado);
 
     }
@@ -515,7 +605,7 @@ public class SolicitaEmprestimoController {
 
             }
         }.start();
-        tblBuscaMateriais.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+        tblListaMateriais.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
         tabListaMaterial.setDisable(true);
         dataObrigatorio.setVisible(false);
         finalidadeObrigatorio.setVisible(false);

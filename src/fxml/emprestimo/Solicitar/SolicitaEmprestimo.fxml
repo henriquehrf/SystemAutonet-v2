@@ -110,12 +110,12 @@
                                  <children>
                                     <HBox alignment="CENTER" prefHeight="45.0" prefWidth="800.0">
                                        <children>
-                                          <Button fx:id="btnSolicitar" mnemonicParsing="false" onAction="#btnSolicitarOnAction" styleClass="button-solicitar" text="%btn.solicitar">
+                                          <Button fx:id="btnSolicitar" mnemonicParsing="false" onAction="#btnSolicitarOnAction" onKeyPressed="#btnSolicitarOnKeyPressed" styleClass="button-solicitar" text="%btn.solicitar">
                                              <HBox.margin>
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                              </HBox.margin>
                                           </Button>
-                                          <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#btnCancelarOnAction" styleClass="button-cancel" text="%btn.cancelar">
+                                          <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#btnCancelarOnAction" onKeyPressed="#btnCancelarOnKeyPressed" styleClass="button-cancel" text="%btn.cancelar">
                                              <HBox.margin>
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                              </HBox.margin>
@@ -158,7 +158,7 @@
                                  <children>
                                     <Label text="%lbl.pesquisar" />
                                     <TextField fx:id="txtBuscador" maxHeight="25.0" prefHeight="25.0" prefWidth="383.0" />
-                                    <Button fx:id="btnBuscar" mnemonicParsing="false" onAction="#btnBuscarOnAction" prefHeight="25.0" prefWidth="29.0" styleClass="button-search" />
+                                    <Button fx:id="btnBuscar" mnemonicParsing="false" onAction="#btnBuscarOnAction" onKeyPressed="#btnBuscarOnKeyPressed" prefHeight="25.0" prefWidth="29.0" styleClass="button-search" />
                                  </children>
                               </HBox>
                            </children>
@@ -187,12 +187,12 @@
                            <children>
                               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Button fx:id="btnAdicionarMaterial" mnemonicParsing="false" onAction="#btnAdicionarMaterialOnAction" styleClass="button-adicionarPedido" text="%btn.adicionarMaterial">
+                                    <Button fx:id="btnAdicionarMaterial" mnemonicParsing="false" onAction="#btnAdicionarMaterialOnAction" onKeyPressed="#btnAdicionarMaterialKeyPressed" styleClass="button-adicionarPedido" text="%btn.adicionarMaterial">
                                        <HBox.margin>
                                           <Insets bottom="10.0" left="10.0" right="10.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button fx:id="btnVoltar" mnemonicParsing="false" onAction="#btnVoltarOnAction" styleClass="button-voltar" text="%btn.voltar">
+                                    <Button fx:id="btnVoltar" mnemonicParsing="false" onAction="#btnVoltarOnAction" onKeyPressed="#btnVoltarOnKeyPressed" styleClass="button-voltar" text="%btn.voltar">
                                        <HBox.margin>
                                           <Insets bottom="10.0" left="10.0" right="10.0" />
                                        </HBox.margin>

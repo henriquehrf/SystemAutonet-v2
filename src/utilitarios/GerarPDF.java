@@ -11,7 +11,9 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -24,8 +26,6 @@ import vo.Pessoa;
  * @author Henrique
  */
 public class GerarPDF {
-
-    static int copyPdf = 0;
 
     private PdfPTable gerarTabelaSolicitacaoEmprestimo(List<Material> list) {
         // a table with three columns
@@ -46,7 +46,7 @@ public class GerarPDF {
         return table;
     }
 
-    public void solicitarEmprestimo(String url, List<Material> lista, String finalidade, String data, String Observacao, Pessoa usuario) {
+    public void solicitarEmprestimo(String url, List<Material> lista, String finalidade, String data, String Observacao, Pessoa usuario) throws Exception {
 
         Date dt = new Date();
         String pattern = "dd/MM/yyyy";
@@ -55,30 +55,26 @@ public class GerarPDF {
 // criação do documento
         Document document = new Document();
 
-        try {
+        PdfWriter.getInstance(document, new FileOutputStream(url + "/ListaMateriais" + dt.getTime() + ".pdf"));
+        document.open();
+        document.addCreationDate();
+        String caminho = new File("./src/utilitarios/icones/icone.png").getCanonicalPath();
+        Image figura = Image.getInstance(caminho);
+        figura.scaleToFit(100, 100);
+        figura.setAlignment(1);
+        document.add(figura);
 
-            PdfWriter.getInstance(document, new FileOutputStream(url + "/ListaMateriais" + copyPdf + ".pdf"));
-            copyPdf++;
-            document.open();
-            document.addCreationDate();
-            Image figura = Image.getInstance("C:\\Users\\Henrique\\Documents\\NetBeansProjects\\SystemAutonet\\src\\utilitarios\\icones\\icone.png");
-            figura.scaleToFit(100, 100);
-            figura.setAlignment(1);
-            document.add(figura);
+        Paragraph p = new Paragraph("SystemAutoNet - Lista de Materiais");
+        p.setAlignment("center");
+        document.add(p);
+        document.add(new Paragraph(" "));
+        document.add(gerarTabelaSolicitacaoEmprestimo(lista));
+        document.add(new Paragraph(" "));
 
-            Paragraph p = new Paragraph("SystemAutoNet - Lista de Materiais");
-            p.setAlignment("center");
-            document.add(p);
-            document.add(new Paragraph(" "));
-            document.add(gerarTabelaSolicitacaoEmprestimo(lista));
-            document.add(new Paragraph(" "));
+        Paragraph dados = new Paragraph("\nAluno: " + usuario.getNome().toUpperCase() + "\nNº Matricula: " + usuario.getNum_matricula() + "\nFinalidade: " + finalidade + "\nObservações: " + Observacao + "\nData para Empréstimo: " + data + "\nData da Solicitação: " + dtSolicitacao);
+        dados.getIndentationLeft();
+        document.add(dados);
 
-            Paragraph dados = new Paragraph("\nAluno: " + usuario.getNome() + "\nNº Matricula: " + usuario.getNum_matricula() + "\nFinalidade: " + finalidade + "\nObservações: " + Observacao + "\nData do Empréstimo: " + data + "\nData da Solicitação: " + dtSolicitacao);
-            dados.getIndentationLeft();
-            document.add(dados);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
         document.close();
     }
 

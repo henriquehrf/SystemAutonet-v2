@@ -47,8 +47,9 @@ public class GenericoDAO<T extends EntidadeBase> {
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
-            System.out.println("Erro ao salvar");
-            System.out.println(ex.getMessage());
+            throw new Exception(ex.getMessage());
+            // System.out.println("Erro ao salvar");
+            //System.out.println(ex.getMessage());
         } finally {
             em.close();
         }
