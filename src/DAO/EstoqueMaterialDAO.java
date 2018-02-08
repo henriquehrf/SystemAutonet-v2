@@ -38,35 +38,53 @@ public class EstoqueMaterialDAO extends GenericoDAO<EstoqueMaterial> {
         return lista;
     }
 
-    public Number QtdDisponivelDoMaterial(Material material) throws Exception{
+    public List<EstoqueMaterial> buscarTodosEstoqueMaterial() {
+        EntityManager em = getEM();
+        Query query;
+        List<EstoqueMaterial> lista;
+
+        try {
+            query = em.createNamedQuery("EstoqueMaterial.BuscarTodosEstoqueMaterial");
+            lista = query.getResultList();
+
+        } catch (Exception ex) {
+            lista = new ArrayList();
+        } finally {
+            em.close();
+        }
+
+        return lista;
+    }
+
+    public Number QtdDisponivelDoMaterial(Material material) throws Exception {
         EntityManager em = getEM();
         Query query;
         Number qtd;
-        
+
         try {
             query = em.createNamedQuery("EstoqueMaterial.QtdDisponivelDoMaterial");
             query.setParameter("idMaterial", material.getId());
             qtd = (Number) query.getSingleResult();
 
         } catch (Exception ex) {
-            throw new Exception("Erro na classe EstoqueMaterialDAO pode explodi o seu pc "+ex.getMessage());
-         
+            throw new Exception("Erro na classe EstoqueMaterialDAO pode explodi o seu pc " + ex.getMessage());
+
         } finally {
             em.close();
         }
         return qtd;
     }
-    
-     public EstoqueMaterial buscarPorIdMaterialIdLocal(EstoqueMaterial estoqueMaterial) throws Exception {
+
+    public EstoqueMaterial buscarPorIdMaterialIdLocal(EstoqueMaterial estoqueMaterial) throws Exception {
         EntityManager em = getEM();
         Query query;
         EstoqueMaterial lista;
 
         try {
-            
+
             query = em.createNamedQuery("EstoqueMaterial.BuscarPorIdMaterialIdlocal");
-            query.setParameter("idMaterial",estoqueMaterial.getId_material().getId());
-            query.setParameter("idLocal",estoqueMaterial.getId_departamento().getId());
+            query.setParameter("idMaterial", estoqueMaterial.getId_material().getId());
+            query.setParameter("idLocal", estoqueMaterial.getId_departamento().getId());
             lista = (EstoqueMaterial) query.getSingleResult();
 
         } catch (NoResultException ex) {
@@ -77,4 +95,5 @@ public class EstoqueMaterialDAO extends GenericoDAO<EstoqueMaterial> {
 
         return lista;
     }
+
 }

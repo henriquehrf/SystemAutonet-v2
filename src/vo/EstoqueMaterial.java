@@ -24,11 +24,16 @@ import javax.persistence.NamedQuery;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "EstoqueMaterial.BuscarPorIdMaterial",
-            query = "select e from EstoqueMaterial e where e.id_material.id_material = :idMaterial"),
+            query = "select e from EstoqueMaterial e where e.id_material.id_material = :idMaterial")
+    ,
     @NamedQuery(name = "EstoqueMaterial.QtdDisponivelDoMaterial",
-            query = "select SUM(e.quantidade_disponivel) from EstoqueMaterial e where e.id_material.id_material = :idMaterial"),
+            query = "select SUM(e.quantidade_disponivel) from EstoqueMaterial e where e.id_material.id_material = :idMaterial")
+    ,
      @NamedQuery(name = "EstoqueMaterial.BuscarPorIdMaterialIdlocal",
             query = "select e from EstoqueMaterial e where e.id_material.id_material = :idMaterial AND e.id_local.id_local = :idLocal")
+    ,
+@NamedQuery(name = "EstoqueMaterial.BuscarTodosEstoqueMaterial",
+            query = "select e from EstoqueMaterial e ")
 
 })
 public class EstoqueMaterial implements Serializable, EntidadeBase {
@@ -42,8 +47,7 @@ public class EstoqueMaterial implements Serializable, EntidadeBase {
 
     @Column(nullable = false)
     private int quantidade_disponivel;
-    
-    
+
     @ManyToOne(fetch = FetchType.EAGER)
     private Local id_local = null;
 
@@ -52,6 +56,18 @@ public class EstoqueMaterial implements Serializable, EntidadeBase {
 
     public Local getId_departamento() {
         return id_local;
+    }
+
+    public String getLocalDescricao() {
+        return id_local.getDescricao() + " " + id_local.getNumero() + " - " + id_local.getSigla();
+    }
+
+    public String getQtdDisponivelFormat() {
+        return quantidade_disponivel + " " + id_material.getId_tipo_unidade().getSigla();
+    }
+    
+    public String getMaterialDescricao(){
+        return id_material.getDescricao();
     }
 
     public void setId_departamento(Local id_departamento) {
@@ -65,7 +81,6 @@ public class EstoqueMaterial implements Serializable, EntidadeBase {
     public void setId_material(Material id_material) {
         this.id_material = id_material;
     }
-
 
     @Override
     public Long getId() {

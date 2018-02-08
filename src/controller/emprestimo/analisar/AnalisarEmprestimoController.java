@@ -15,6 +15,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -24,16 +26,27 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
 import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
 import vo.EntradaMaterial;
+import vo.EstoqueMaterial;
+import vo.Local;
 import vo.Material;
 import vo.Pessoa;
 
@@ -48,31 +61,10 @@ public class AnalisarEmprestimoController implements Initializable {
     private Button btnRecusar;
 
     @FXML
-    private Button btnAdicionarLocal;
-
-    @FXML
-    private Button btnEditarLocal;
-
-    @FXML
-    private Button btnSelecionar;
-
-    @FXML
     private TableView<TblPessoaEmprestimo> tblAguardandoAnalise;
 
     @FXML
     private TableColumn<Material, String> tbcDisponibilidadeAnalise;
-
-    @FXML
-    private TableColumn<?, ?> tbcQuantidadeSolicitadaSeparado;
-
-    @FXML
-    private TextField txtQtdSolicitada;
-
-    @FXML
-    private TextField txtMaterial;
-
-    @FXML
-    private TableColumn<?, ?> tbcQtdSolicitadaBusca;
 
     @FXML
     private Button btnAprovar;
@@ -85,21 +77,6 @@ public class AnalisarEmprestimoController implements Initializable {
 
     @FXML
     private Button btnSalvar;
-
-    @FXML
-    private TableColumn<?, ?> tbcDescricaoSeparado;
-
-    @FXML
-    private Tab tabBuscarMaterial;
-
-    @FXML
-    private TableColumn<?, ?> tbcMaterialSeparado;
-
-    @FXML
-    private TableView<?> tblPrincipalBuscarMaterial;
-
-    @FXML
-    private TableColumn<?, ?> tbcQuantidadeDisponivelSeparado;
 
     @FXML
     private TableColumn<TblPessoaEmprestimo, String> tbcDtEmprestimo;
@@ -135,22 +112,13 @@ public class AnalisarEmprestimoController implements Initializable {
     private Label lblFinalidade;
 
     @FXML
-    private Button btnRemoverLocal;
-
-    @FXML
     private TableColumn<TblPessoaEmprestimo, String> tbcFinalidade;
 
     @FXML
     private Tab tabListaEmprestimo;
 
     @FXML
-    private TableColumn<?, ?> tbcDescricaoBusca;
-
-    @FXML
     private TableColumn<Material, Integer> tbcQuantidadeAnalise;
-
-    @FXML
-    private TableColumn<?, ?> tbcQuantidadeBusca;
 
     @FXML
     private TableColumn<TblPessoaEmprestimo, String> tbcPessoa;
@@ -160,6 +128,161 @@ public class AnalisarEmprestimoController implements Initializable {
 
     @FXML
     private TableView<Material> tblListaMaterial;
+
+    //-------
+    @FXML
+    private TableColumn<EstoqueMaterial, Integer> tbcQtdSeparada;
+
+    @FXML
+    private TableColumn<EstoqueMaterial, String> tbcMaterialSeparado;
+
+    @FXML
+    private TableView<Material> tbvMaterialListSeparar;
+
+    @FXML
+    private TableView<EstoqueMaterial> tbvMaterialSeparado;
+
+    @FXML
+    private RadioButton rdbObsUnica;
+
+    @FXML
+    private TextField txtQtdDesejada;
+
+    @FXML
+    private Button btnRemoverLista;
+
+    @FXML
+    private Button btnCancelarOperacao;
+
+    @FXML
+    private AnchorPane AnchorPaneValidation;
+
+    @FXML
+    private Button btnSalvarOperacao;
+
+    @FXML
+    private RadioButton rdbObsIndividual;
+
+    @FXML
+    private TableColumn<EstoqueMaterial, String> tbcLocalSeparar;
+
+    @FXML
+    private Button btnAdicionarLista;
+
+    @FXML
+    private TableColumn<EstoqueMaterial, Integer> tbcQtdSeparar;
+
+    @FXML
+    private ProgressIndicator loading;
+
+    @FXML
+    private TextField txtLocalEscolhido;
+
+    @FXML
+    private TextArea txtObs;
+
+    @FXML
+    private Button btnApagarTodasObs;
+
+    @FXML
+    private TableColumn<Material, Integer> tbcQtdMaterialSeparar;
+
+    @FXML
+    private Label txtMsgLoading;
+
+    @FXML
+    private ListView<?> tblMaterialObs;
+
+    @FXML
+    private TableView<EstoqueMaterial> tbvLocalListSeparar;
+
+    @FXML
+    private TextField txtMaterialEscolhido;
+
+    @FXML
+    private TableColumn<Material, String> tbcMaterialListaSeparar;
+
+    @FXML
+    private TableColumn<EstoqueMaterial, String> tbcLocalSeparado;
+
+    List<EstoqueMaterial> estoqueSeparado = new ArrayList<>();
+    List<EstoqueMaterial> estoqueASeparar = new ArrayList<>();
+
+    @FXML
+    void btnAprovarOnAction(ActionEvent event) {
+
+        completarTblListaMaterialSeparar(tblListaMaterial.getItems());
+
+        new Thread() {
+            @Override
+            public void run() {
+                estoqueASeparar = NegociosEstaticos.getNegocioEstoqueMateria().buscarTodosEstoqueMaterial();
+            }
+        }.start();
+
+    }
+
+    @FXML
+    void tbvLocalListSepararOnClicked(MouseEvent event) {
+        if (event.getButton() == MouseButton.PRIMARY) {
+            if (tbvLocalListSeparar.getSelectionModel().getSelectedItem() != null) {
+                EstoqueMaterial e = tbvLocalListSeparar.getSelectionModel().getSelectedItem();
+                txtLocalEscolhido.setText(e.getLocalDescricao());
+                tbvMaterialSeparado.getSelectionModel().select(null);
+            }
+        }
+    }
+
+    void filterTbvLocal(Material m) {
+        List<EstoqueMaterial> aux = new ArrayList<>();
+        for (EstoqueMaterial vo : estoqueASeparar) {
+            if (vo.getId_material().getId().equals(m.getId())) {
+                aux.add(vo);
+            }
+        }
+        completarTbvLocalListSeparar(aux);
+    }
+
+    @FXML
+    void tbvMaterialListSepararOnMouseClicked(MouseEvent event) {
+        if (event.getButton() == MouseButton.PRIMARY) {
+            if (tbvMaterialListSeparar.getSelectionModel().getSelectedItem() != null) {
+                Material m = tbvMaterialListSeparar.getSelectionModel().getSelectedItem();
+                if (m.getQuantidade() > 0) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+
+                            while (estoqueASeparar.size() == 0) {
+                                try {
+                                    Thread.sleep(1);
+                                } catch (InterruptedException ex) {
+                                    System.out.println(ex.getMessage());
+                                }
+                            }
+                            filterTbvLocal(m);
+                        }
+                    }.start();
+
+                    txtMaterialEscolhido.setText(m.getDescricao());
+                    txtLocalEscolhido.setText("");
+                    txtQtdDesejada.setText("");
+                    tbvMaterialSeparado.getSelectionModel().select(null);
+                }
+            }
+        }
+    }
+
+    @FXML
+    void btnRecusarOnAction(ActionEvent event) {
+
+    }
+
+    @FXML
+    void btnVoltarAnaliseOnAction(ActionEvent event) {
+
+    }
+    //---------
 
     List<TblPessoaEmprestimo> ListaOf = new ArrayList();
     List<TblEmprestimoEstoque> ListaPessoaMaterial = new ArrayList();
@@ -182,12 +305,11 @@ public class AnalisarEmprestimoController implements Initializable {
                 }
             }
         }
-        
+
         lblDtEmprestimo.setText(result.getEmprestimoDt());
         lblFinalidade.setText(result.getFinalidade());
         lblObservacao.setText(result.getEmprestimo().getObservacao());
-        
-        
+
         completarTblListaMaterial(tblListaMaterial);
         tabAnaliseEmprestimo.setDisable(false);
 
@@ -202,21 +324,6 @@ public class AnalisarEmprestimoController implements Initializable {
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
-    }
-
-    @FXML
-    void btnAprovarOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnRecusarOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnVoltarAnaliseOnAction(ActionEvent event) {
-
     }
 
     @FXML
@@ -254,6 +361,206 @@ public class AnalisarEmprestimoController implements Initializable {
 
     }
 
+    @FXML
+    void btnRemoverListaOnAction(ActionEvent event) {
+
+        if (tbvMaterialSeparado.getSelectionModel().getSelectedItem() != null) {
+            EstoqueMaterial estoqueMaterial = tbvMaterialSeparado.getSelectionModel().getSelectedItem();
+
+            int index = -1;
+            Material material = new Material();
+            for (Material vo : tbvMaterialListSeparar.getItems()) {
+                index++;
+                if (vo.getId().equals(estoqueMaterial.getId_material().getId())) {
+                    material = vo;
+                    break;
+                }
+            }
+            material.setQuantidadeSolicitada(estoqueMaterial.getQuantidade_emprestada() + material.getQuantidadeSolicitada());
+            tbvMaterialListSeparar.getItems().set(index, material);
+            tbvMaterialListSeparar.refresh();
+
+            EstoqueMaterial aux = new EstoqueMaterial();
+            index = -1;
+            for (EstoqueMaterial vo : estoqueASeparar) {
+                index++;
+                if (vo.getId_departamento().getId().equals(estoqueMaterial.getId_departamento().getId())
+                        && vo.getId_material().getId().equals(estoqueMaterial.getId_material().getId())) {
+                    aux = vo;
+                    break;
+                }
+            }
+            aux.setQuantidade(aux.getQuantidade() + estoqueMaterial.getQuantidade_emprestada());
+            estoqueASeparar.set(index, aux);
+            tbvLocalListSeparar.refresh();
+
+            estoqueSeparado.remove(estoqueMaterial);
+            completeTableMaterialSeparado(estoqueSeparado);
+            txtQtdDesejada.setText("");
+            txtLocalEscolhido.setText("");
+            txtMaterialEscolhido.setText("");
+        }
+
+    }
+
+    @FXML
+    void tbvMaterialSeparadoOnClicked(MouseEvent event) {
+        if (event.getButton() == MouseButton.PRIMARY) {
+            if (tbvMaterialSeparado.getSelectionModel().getSelectedItem() != null) {
+                EstoqueMaterial estoqueMaterial = tbvMaterialSeparado.getSelectionModel().getSelectedItem();
+                txtLocalEscolhido.setText(estoqueMaterial.getLocalDescricao());
+                txtMaterialEscolhido.setText(estoqueMaterial.getMaterialDescricao());
+                txtQtdDesejada.setText("" + estoqueMaterial.getQuantidade_emprestada());
+
+                for (Material vo : tbvMaterialListSeparar.getItems()) {
+                    if (vo.getId().equals(estoqueMaterial.getId_material().getId())) {
+                        tbvMaterialListSeparar.getSelectionModel().select(vo);
+                        break;
+                    }
+                }
+
+                filterTbvLocal(estoqueMaterial.getId_material());
+
+                for (EstoqueMaterial vo : tbvLocalListSeparar.getItems()) {
+                    if (vo.getId_departamento().getId().equals(estoqueMaterial.getId_departamento().getId())) {
+                        tbvLocalListSeparar.getSelectionModel().select(vo);
+                    }
+                }
+            }
+        }
+    }
+
+    @FXML
+    void btnAdicionarListaOnAction(ActionEvent event) {
+
+        if (!txtLocalEscolhido.getText().isEmpty() && !txtMaterialEscolhido.getText().isEmpty()
+                && !txtQtdDesejada.getText().isEmpty()) {
+
+            int qtd = Integer.parseInt(txtQtdDesejada.getText());
+            Material material = tbvMaterialListSeparar.getSelectionModel().getSelectedItem();
+            EstoqueMaterial estoqueMaterial = tbvLocalListSeparar.getSelectionModel().getSelectedItem();
+
+            if (qtd <= material.getQuantidadeSolicitada()
+                    && qtd <= estoqueMaterial.getQuantidade()) {
+
+                EstoqueMaterial e = new EstoqueMaterial();
+                e.setId_departamento(tbvLocalListSeparar.getSelectionModel().getSelectedItem().getId_departamento());
+                e.setId_material(tbvMaterialListSeparar.getSelectionModel().getSelectedItem());
+                e.setQuantidade_emprestada(qtd);
+                estoqueSeparado.add(e);
+
+                EstoqueMaterial aux = new EstoqueMaterial();
+                int index = 0;
+                for (int i = 0; i < estoqueASeparar.size(); i++) {
+                    if (estoqueASeparar.get(i).getId_departamento().getId().equals(estoqueMaterial.getId_departamento().getId())
+                            && estoqueASeparar.get(i).getId_material().getId().equals(estoqueMaterial.getId_material().getId())) {
+                        aux = estoqueASeparar.get(i);
+                        index = i;
+                        break;
+                    }
+                }
+
+                aux.setQuantidade(aux.getQuantidade() - qtd);
+                estoqueASeparar.set(index, aux);
+
+                index = tbvMaterialListSeparar.getItems().indexOf(material);
+                if (index >= 0) {
+                    material.setQuantidadeSolicitada(material.getQuantidadeSolicitada() - qtd);
+                    tbvMaterialListSeparar.getItems().set(index, material);
+                }
+
+                completarTblListaMaterialSeparar(tbvMaterialListSeparar.getItems());
+                completeTableMaterialSeparado(estoqueSeparado);
+                tbvLocalListSeparar.refresh();
+                txtQtdDesejada.setText("");
+                txtLocalEscolhido.setText("");
+                txtMaterialEscolhido.setText("");
+                tbvLocalListSeparar.getSelectionModel().select(null);
+                tbvMaterialListSeparar.getSelectionModel().select(null);
+            }
+
+        }
+    }
+
+    private void completeTableMaterialSeparado(List<EstoqueMaterial> lista) {
+        ObservableList<EstoqueMaterial> dado = FXCollections.observableArrayList();
+        dado.addAll(lista);
+
+        this.tbcLocalSeparado.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("LocalDescricao"));
+        this.tbcQtdSeparada.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, Integer>("Quantidade_emprestada"));
+        this.tbcMaterialSeparado.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("MaterialDescricao"));
+
+        this.tbvMaterialSeparado.setItems(dado);
+    }
+
+    private void completarTbvLocalListSeparar(List<EstoqueMaterial> lista) {
+        ObservableList<EstoqueMaterial> dado = FXCollections.observableArrayList();
+        dado.addAll(lista);
+
+        this.tbcLocalSeparar.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("LocalDescricao"));
+        this.tbcQtdSeparar.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, Integer>("QtdDisponivelFormat"));
+
+        this.tbvLocalListSeparar.setItems(dado);
+
+        tbcLocalSeparar.setCellFactory(new Callback<TableColumn<EstoqueMaterial, String>, TableCell<EstoqueMaterial, String>>() {
+            @Override
+            public TableCell<EstoqueMaterial, String> call(TableColumn<EstoqueMaterial, String> p) {
+                return new TableCell<EstoqueMaterial, String>() {
+                    @Override
+                    public void updateItem(String t, boolean empty) {
+                        super.updateItem(t, empty);
+                        if (t == null) {
+                            setTooltip(null);
+                            setText(null);
+                        } else {
+                            Tooltip tooltip = new Tooltip();
+                            tooltip.setStyle("-fx-background-color:LightGreen;");
+                            EstoqueMaterial e = getTableView().getItems().get(getTableRow().getIndex());
+                            tooltip.setText(e.getLocalDescricao());
+                            setTooltip(tooltip);
+                            setText(t.toString());
+                        }
+                    }
+                };
+            }
+        });
+
+    }
+
+    private void completarTblListaMaterialSeparar(List<Material> lista) {
+        ObservableList<Material> dado = FXCollections.observableArrayList();
+        dado.addAll(lista);
+
+        this.tbcMaterialListaSeparar.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
+        this.tbcQtdMaterialSeparar.setCellValueFactory(new PropertyValueFactory<Material, Integer>("QuantidadeSolicitadaFormat"));
+
+        this.tbvMaterialListSeparar.setItems(dado);
+
+        tbcMaterialListaSeparar.setCellFactory(new Callback<TableColumn<Material, String>, TableCell<Material, String>>() {
+            @Override
+            public TableCell<Material, String> call(TableColumn<Material, String> p) {
+                return new TableCell<Material, String>() {
+                    @Override
+                    public void updateItem(String t, boolean empty) {
+                        super.updateItem(t, empty);
+                        if (t == null) {
+                            setTooltip(null);
+                            setText(null);
+                        } else {
+                            Tooltip tooltip = new Tooltip();
+                            tooltip.setStyle("-fx-background-color:LightGreen;");
+                            Material m = getTableView().getItems().get(getTableRow().getIndex());
+                            tooltip.setText(m.getDescricao());
+                            setTooltip(tooltip);
+                            setText(t.toString());
+                        }
+                    }
+                };
+            }
+        });
+
+    }
+
     private void completarTblListaMaterial(List<Material> lista) {
         ObservableList<Material> dado = FXCollections.observableArrayList();
         dado.addAll(lista);
@@ -262,8 +569,6 @@ public class AnalisarEmprestimoController implements Initializable {
         this.tbcQuantidadeAnalise.setCellValueFactory(new PropertyValueFactory<Material, Integer>("QuantidadeSolicitadaFormat"));
         this.tbcCategoriaAnalise.setCellValueFactory(new PropertyValueFactory<Material, String>("CategoriaNome"));
         this.tbcDisponibilidadeAnalise.setCellValueFactory(new PropertyValueFactory<Material, String>("QuantidadeDisponivelFormat"));
-
-        
 
         this.tblListaMaterial.setItems(dado);
 
@@ -290,9 +595,7 @@ public class AnalisarEmprestimoController implements Initializable {
         TabPanePrincipal.getSelectionModel().select(tabListaEmprestimo);
         tabListaEmprestimo.setDisable(false);
         tabAnaliseEmprestimo.setDisable(true);
-        tabItensSeparado.setDisable(true);
-        tabBuscarMaterial.setDisable(true);
-        tabBuscarMaterial.setDisable(true);
+        tabItensSeparado.setDisable(false);
 
         new Thread() {
             @Override
