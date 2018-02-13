@@ -91,7 +91,7 @@
                                        <children>
                                           <HBox alignment="CENTER_LEFT" prefHeight="47.0" prefWidth="798.0">
                                              <children>
-                                                <Label text="Numero da Nota Fiscal">
+                                                <Label text="Número da Nota Fiscal">
                                                    <HBox.margin>
                                                       <Insets left="10.0" />
                                                    </HBox.margin></Label>

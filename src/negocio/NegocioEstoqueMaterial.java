@@ -8,6 +8,7 @@ package negocio;
 import DAO.EstoqueMaterialDAO;
 import java.util.List;
 import vo.EstoqueMaterial;
+import vo.Local;
 import vo.Material;
 
 /**
@@ -51,6 +52,11 @@ public class NegocioEstoqueMaterial {
     public Number QtdDisponivelDoMaterial(Material material) throws Exception {
 
         return emDAO.QtdDisponivelDoMaterial(material);
+    }
+    
+     public Number QtdDisponivelDoMaterialPorEstoque(Material material,Local local) throws Exception {
+
+        return emDAO.QtdDisponivelDoMaterialPorEstoque(material,local);
     }
 
     public EstoqueMaterial BuscarPorIdMaterialIdLocal(EstoqueMaterial estoqueMaterial) throws Exception {

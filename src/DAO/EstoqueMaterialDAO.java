@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import vo.EstoqueMaterial;
+import vo.Local;
 import vo.Material;
 
 /**
@@ -67,7 +68,27 @@ public class EstoqueMaterialDAO extends GenericoDAO<EstoqueMaterial> {
             qtd = (Number) query.getSingleResult();
 
         } catch (Exception ex) {
-            throw new Exception("Erro na classe EstoqueMaterialDAO pode explodi o seu pc " + ex.getMessage());
+            throw new Exception(ex.getMessage());
+
+        } finally {
+            em.close();
+        }
+        return qtd;
+    }
+    
+     public Number QtdDisponivelDoMaterialPorEstoque(Material material,Local local) throws Exception {
+        EntityManager em = getEM();
+        Query query;
+        Number qtd;
+
+        try {
+            query = em.createNamedQuery("EstoqueMaterial.QtdDisponivelDoMaterialPorEstoque");
+            query.setParameter("idMaterial", material.getId());
+            query.setParameter("idLocal", local.getId());
+            qtd = (Number) query.getSingleResult();
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
 
         } finally {
             em.close();

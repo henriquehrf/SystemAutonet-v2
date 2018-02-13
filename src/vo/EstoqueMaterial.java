@@ -32,10 +32,11 @@ import javax.persistence.NamedQuery;
      @NamedQuery(name = "EstoqueMaterial.BuscarPorIdMaterialIdlocal",
             query = "select e from EstoqueMaterial e where e.id_material.id_material = :idMaterial AND e.id_local.id_local = :idLocal")
     ,
-@NamedQuery(name = "EstoqueMaterial.BuscarTodosEstoqueMaterial",
+    @NamedQuery(name = "EstoqueMaterial.BuscarTodosEstoqueMaterial",
             query = "select e from EstoqueMaterial e ")
-
-})
+    ,
+    @NamedQuery(name = "EstoqueMaterial.QtdDisponivelDoMaterialPorEstoque",
+            query = "select e.quantidade_disponivel from EstoqueMaterial e  where e.id_material.id_material =:idMaterial AND e.id_local.id_local=:idLocal"),})
 public class EstoqueMaterial implements Serializable, EntidadeBase {
 
     @Id
@@ -62,11 +63,15 @@ public class EstoqueMaterial implements Serializable, EntidadeBase {
         return id_local.getDescricao() + " " + id_local.getNumero() + " - " + id_local.getSigla();
     }
 
+    public String getQtdEmprestadaFormat() {
+        return quantidade_emprestada + " " + id_material.getId_tipo_unidade().getSigla();
+    }
+
     public String getQtdDisponivelFormat() {
         return quantidade_disponivel + " " + id_material.getId_tipo_unidade().getSigla();
     }
-    
-    public String getMaterialDescricao(){
+
+    public String getMaterialDescricao() {
         return id_material.getDescricao();
     }
 

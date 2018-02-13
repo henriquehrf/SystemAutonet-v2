@@ -573,7 +573,7 @@ public class SolicitaEmprestimoController {
         }
         this.tbcCategoriaBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, String>("CategoriaNome"));
         this.tbcMaterialBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
-        this.tbcQuantidadeDisponivelBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, Number>("quantidade"));
+        this.tbcQuantidadeDisponivelBuscaMaterial.setCellValueFactory(new PropertyValueFactory<Material, Number>("QuantidadeDisponivelFormat"));
 
         Comparator<Material> cmp = new Comparator<Material>() {
             @Override

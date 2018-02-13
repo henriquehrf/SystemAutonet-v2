@@ -229,14 +229,12 @@ public class CadastroPessoaController {
 
                 }
             } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+                System.out.println("???s");
                 LerMessage ler = new LerMessage();
                 Alertas aviso = new Alertas();
-                try {
+                aviso.alerta(Alert.AlertType.ERROR, ler.getMessage("msg.cadastro.erro"), ex.getMessage());
 
-                    aviso.alerta(Alert.AlertType.ERROR, ler.getMessage("msg.cadastro.erro"), ex.getMessage());
-                } catch (Exception ex1) {
-                    System.out.println(ex1.getMessage());
-                }
             }
 
         } else {
@@ -386,7 +384,7 @@ public class CadastroPessoaController {
         if (rdbInativo.isSelected()) {
             pessoa.setAtivo(Atividade.I);
         }
-        if(!txtSenha.getText().equals(txtRSenha.getText())){
+        if (!txtSenha.getText().equals(txtRSenha.getText())) {
             Alertas aviso = new Alertas();
             LerMessage ler = new LerMessage();
             aviso.alerta(Alert.AlertType.ERROR, ler.getMessage("msg.cadastro.erro"), ler.getMessage("msg.cadastro.senhaDiferente"));
