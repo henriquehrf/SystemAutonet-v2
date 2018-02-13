@@ -384,6 +384,23 @@
     -fx-min-height:25;
     -fx-min-width:25;
 }
+.button-removerTodos{
+    -fx-border-color:none;
+    -fx-background-color:white;
+    -fx-background-color: linear-gradient( #ffffff,   #cd5c5c);
+    -fx-font-size: 9pt;
+    -fx-font-family: "Arial";
+    /*    -fx-cursor:hand;*/
+    -fx-background-image: url('icones/delete_all.png');
+    -fx-background-size: 20 20 ;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position:center;
+    -fx-alignment:CENTER;
+    -fx-max-height:25;
+    -fx-max-width:25;
+    -fx-min-height:25;
+    -fx-min-width:25;
+}
 .button-analisar{
     -fx-border-color:darkgrey;
     -fx-background-color:none;

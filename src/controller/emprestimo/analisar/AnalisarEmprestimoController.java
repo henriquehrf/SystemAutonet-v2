@@ -15,21 +15,31 @@ import enumm.StatusEmprestimo;
 import gui.SystemAutonet;
 import java.io.File;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -51,8 +61,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import utilitarios.Alertas;
 import utilitarios.EnviarEmail;
@@ -229,6 +245,33 @@ public class AnalisarEmprestimoController implements Initializable {
     List<Material> ListaMaterial = new ArrayList<>();
     String htmlTable = "";
 
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblAguardandoAnalise.setPlaceholder(h);
+                } else {
+                    tblAguardandoAnalise.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tblListaMaterial.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tblMaterialObs.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tbvLocalListSeparar.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tbvMaterialListSeparar.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tbvMaterialSeparado.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+
+                }
+            }
+        });
+
+    }
+
     @FXML
     void btnAprovarOnAction(ActionEvent event) {
 
@@ -341,11 +384,148 @@ public class AnalisarEmprestimoController implements Initializable {
 
     void table(EmprestimoEstoqueMaterial vo) {
         htmlTable += "<tr><td>" + vo.getQtd_emprestada() + " " + vo.getId_material().getId_tipo_unidade().getSigla() + "</td><td>" + vo.getId_material().getDescricao() + "</td><td>" + vo.getId_material().getId_categoria().getDescricao() + "</td><td>" + vo.getId_estoquematerial().getId_departamento().getDescricao() + "</td><td>" + vo.getObservacao() + "</td></tr>";
+    }
+
+    void table(String quantidade, String material, String categoria) {
+        htmlTable += "<tr><td>" + quantidade + "</td><td>" + material + " </td> <td>" + categoria + "</td></tr>";
+    }
+
+    void emprestimoRecusadoEmail(String justificativa, Emprestimo emp, List<Material> list) {
+        String remetente = "";
+        String conteudo = "";
+        String assunto = "";
+
+        String pattern = "dd/MM/yyyy";
+        Date dt = new Date();
+        SimpleDateFormat dt_format = new SimpleDateFormat(pattern);
+
+        remetente = ClasseDoSistemaEstatico.getPessoa().getEmail() + ",";
+        remetente += emp.getId_pessoa_solicita().getEmail();
+
+        assunto = "SystemAutoNet - Empréstimo de Materiais RECUSADO";
+
+        conteudo += "<html><body>";
+        conteudo += "<p align=\"center\"><b>EMPRÉSTIMO RECUSADO</b></p>";
+        conteudo += "<p><b>A JUSTIFICATIVA PELO QUAL O EMPRÉSTIMO FOI RECUSADO É </b>: " + justificativa.toUpperCase() + "</p>";
+        conteudo += "<p> </p>";
+        conteudo += "<p> </p>";
+        conteudo += "<p><b>ANALISADO POR </b>: " + ClasseDoSistemaEstatico.getPessoa().getNome().toUpperCase() + " EM " + dt_format.format(dt) + "</p>";
+        conteudo += "<p><b>USUÁRIO AUTOR DA SOLICITAÇÃO</b>: " + emp.getId_pessoa_solicita().getNome() + "</p>";
+        conteudo += "<p><b>DATA PARA EMPRÉSTIMO</b>: " + lblDtEmprestimo.getText() + "</p>";
+        conteudo += "<p><b>FINALIDADE</b>: " + lblFinalidade.getText().toUpperCase() + "</p>";
+        conteudo += "<p><b>OBSERVAÇÃO</b>: " + lblObservacao.getText().toUpperCase() + "</p>";
+        conteudo += "<p align=\"center\"><b>LISTA DE MATERIAIS</b></p>";
+        conteudo += "<p> </div>";
+
+        htmlTable += "<style>\n"
+                + "table, th, td {\n"
+                + "border: 1px solid black;\n"
+                + "border-collapse: collapse;\n"
+                + "}\n"
+                + "td {align=center;}\n"
+                + "</style>";
+
+        htmlTable += "<div><table style=\"width:100%\">";
+        htmlTable += "<tr><td><b>QUANTIDADE</b></td><td><b>MATERIAL</b></td> <td><b>CATEGORIA</b></td></tr>";
+
+        for (Material vo : list) {
+            table(vo.getQuantidadeSolicitadaFormat(), vo.getDescricao(), vo.getCategoriaNome());
+        }
+        htmlTable += "</table></div>";
+        conteudo += htmlTable;
+        htmlTable = "";
+        conteudo += "<p> </p>";
+        conteudo += "</body></html>";
+
+        conteudo += "<footer><p align=\"center\">Mensagem gerada automáticamente por SystemAutoNet 1.0</p>";
+        conteudo += "<p align=\"center\"><b>Não responder essa mensagem</b></p></footer>";
+
+        EnviarEmail email = new EnviarEmail();
+        email.enviarEmail(remetente, conteudo, assunto);
 
     }
 
     @FXML
     void btnRecusarOnAction(ActionEvent event) {
+
+        Stage stage = new Stage();
+        Label label = new Label("Qual a justificativa pelo qual o empréstimo foi recusado?");
+        TextArea txt = new TextArea();
+        txt.setPrefSize(300, 150);
+
+        Button btnConfirmar = new Button("Confirmar");
+        btnConfirmar.setPrefSize(100, 25);
+        btnConfirmar.setDefaultButton(true);
+        Button btnCancelar = new Button("Cancelar");
+        btnCancelar.setPrefSize(100, 25);
+        btnCancelar.setCancelButton(true);
+
+        HBox hbox = new HBox(btnConfirmar, btnCancelar);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.setPrefSize(300, 100);
+        hbox.setSpacing(20);
+        VBox vbox = new VBox(label, txt, hbox);
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(10, 10, 10, 10));
+        BorderPane pane = new BorderPane(vbox);
+        Parent parent = pane;
+        Scene scene = new Scene(parent, 350, 250);
+        stage.setScene(scene);
+        stage.setMaximized(false);
+        stage.setTitle("Aguardando uma justificativa");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(StageStyle.UTILITY);
+
+        btnCancelar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                stage.close();
+            }
+        });
+
+        btnConfirmar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Emprestimo emp = tblAguardandoAnalise.getSelectionModel().getSelectedItem().getEmprestimo();
+                emp.setStatus_emprestimo(StatusEmprestimo.RECUSADO);
+                emp.setId_pessoa_autoriza(ClasseDoSistemaEstatico.getPessoa());
+                String obs = txt.getText().concat(":. Por " + ClasseDoSistemaEstatico.getPessoa().getNome());
+                emp.setObservacao(obs);
+                List<Material> mat = tblListaMaterial.getItems();
+                ListaMaterial.clear();
+                completarTblListaMaterial(ListaMaterial);
+                tblListaMaterial.refresh();
+                try {
+                    NegociosEstaticos.getNegocioEmprestimo().salvar(emp);
+                    stage.close();
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            emprestimoRecusadoEmail(txt.getText(), emp, mat);
+                        }
+                    }.start();
+
+                    TabPanePrincipal.getSelectionModel().select(tabListaEmprestimo);
+                    tabListaEmprestimo.setDisable(false);
+                    tabAnaliseEmprestimo.setDisable(true);
+
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                }
+
+                new Thread() {
+                    @Override
+                    public void run() {
+                        ListaOf = new ArrayList();
+                        completarTblAguardandoAnalise(ListaOf);
+                        atualizarTabelaAnalise();
+                    }
+                }.start();
+            }
+        });
+
+        stage.showAndWait();
 
     }
 
@@ -357,7 +537,6 @@ public class AnalisarEmprestimoController implements Initializable {
         tabListaEmprestimo.setDisable(false);
 
     }
-    //---------
 
     List<TblPessoaEmprestimo> ListaOf = new ArrayList();
     List<TblEmprestimoEstoque> ListaPessoaMaterial = new ArrayList();
@@ -367,7 +546,13 @@ public class AnalisarEmprestimoController implements Initializable {
 
         TblPessoaEmprestimo result = tblAguardandoAnalise.getSelectionModel().getSelectedItem();
 
+        if (result == null) {
+            return;
+        }
+        htmlTable = "";
         btnAprovar.setDisable(false);
+
+        ListaMaterial.clear();
 
         List<EmprestimoEstoqueMaterial> emp = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarTodosIdEmprestimo(result.getEmprestimo());
         List<Material> mat = NegociosEstaticos.getNegocioMaterial().buscarTodos();
@@ -733,6 +918,14 @@ public class AnalisarEmprestimoController implements Initializable {
         this.tbcLocalSeparar.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("LocalDescricao"));
         this.tbcQtdSeparar.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, Integer>("QtdDisponivelFormat"));
 
+        Comparator<EstoqueMaterial> cmp = new Comparator<EstoqueMaterial>() {
+            @Override
+            public int compare(EstoqueMaterial cat1, EstoqueMaterial cat2) {
+                return cat1.getId_departamento().getDescricao().compareTo(cat2.getId_departamento().getDescricao());
+
+            }
+        };
+        Collections.sort(dado, cmp);
         this.tbvLocalListSeparar.setItems(dado);
 
         tbcLocalSeparar.setCellFactory(new Callback<TableColumn<EstoqueMaterial, String>, TableCell<EstoqueMaterial, String>>() {
@@ -763,6 +956,15 @@ public class AnalisarEmprestimoController implements Initializable {
     private void completarTblListMaterialObs(List<EmprestimoEstoqueMaterial> lista) {
         ObservableList<EmprestimoEstoqueMaterial> dado = FXCollections.observableArrayList();
         dado.addAll(lista);
+
+        Comparator<EmprestimoEstoqueMaterial> cmp = new Comparator<EmprestimoEstoqueMaterial>() {
+            @Override
+            public int compare(EmprestimoEstoqueMaterial cat1, EmprestimoEstoqueMaterial cat2) {
+                return cat1.getId_material().getDescricao().compareTo(cat2.getId_material().getDescricao());
+
+            }
+        };
+        Collections.sort(dado, cmp);
 
         tblMaterialObs.setItems(dado);
 
@@ -808,19 +1010,22 @@ public class AnalisarEmprestimoController implements Initializable {
 
         Alertas alert = new Alertas();
 
-        Boolean result = false;
+        Boolean listaMaterial = false;
+        Boolean comprovante = false;
 
-        result = alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja gerar um PDF da listagem dos materiais?", "Sim", "Não");
-
-        if (result) {
+        listaMaterial = alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja gerar um PDF da listagem dos materiais?", "Sim", "Não");
+        comprovante = alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja gerar um comprovante de entrega dos materiais?", "Sim", "Não");
+        if (listaMaterial || comprovante) {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             Stage stage = new Stage();
             File selectedDirectory = directoryChooser.showDialog(stage);
             if (selectedDirectory != null) {
                 GerarPDF pdf = new GerarPDF();
                 try {
-                    pdf.analisarEmprestimo(observacao, selectedDirectory.getAbsolutePath());
-                    if (alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja gerar um comprovante de entrega dos materiais?", "Sim", "Não")) {
+                    if (listaMaterial) {
+                        pdf.analisarEmprestimo(observacao, selectedDirectory.getAbsolutePath());
+                    }
+                    if (comprovante) {
                         pdf.comprovanteEntrega(observacao, selectedDirectory.getAbsolutePath(), tblAguardandoAnalise.getSelectionModel().getSelectedItem().getPessoa(), ClasseDoSistemaEstatico.getPessoa());
                     }
                 } catch (Exception ex) {
@@ -882,6 +1087,7 @@ public class AnalisarEmprestimoController implements Initializable {
         }
         remetente += tblAguardandoAnalise.getSelectionModel().getSelectedItem().getPessoa().getEmail();
         email.enviarEmail(remetente, conteudo, assunto);
+        htmlTable = "";
 
     }
 
@@ -1127,6 +1333,14 @@ public class AnalisarEmprestimoController implements Initializable {
         this.tbcMaterialListaSeparar.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
         this.tbcQtdMaterialSeparar.setCellValueFactory(new PropertyValueFactory<Material, Integer>("QuantidadeSolicitadaFormat"));
 
+        Comparator<Material> cmp = new Comparator<Material>() {
+            @Override
+            public int compare(Material cat1, Material cat2) {
+                return cat1.getDescricao().compareTo(cat2.getDescricao());
+            }
+        };
+        Collections.sort(dado, cmp);
+
         this.tbvMaterialListSeparar.setItems(dado);
 
         tbcMaterialListaSeparar.setCellFactory(new Callback<TableColumn<Material, String>, TableCell<Material, String>>() {
@@ -1206,6 +1420,12 @@ public class AnalisarEmprestimoController implements Initializable {
 
     private void completarTblAguardandoAnalise(List<TblPessoaEmprestimo> lista) {
 
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<TblPessoaEmprestimo> dado = FXCollections.observableArrayList();
 
         for (int i = 0; i < lista.size(); i++) {
@@ -1215,11 +1435,56 @@ public class AnalisarEmprestimoController implements Initializable {
         this.tbcPessoa.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("Nome"));
         this.tbcDtEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("EmprestimoDt"));
         this.tbcFinalidade.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("Finalidade"));
+
+        Comparator<TblPessoaEmprestimo> cmp = new Comparator<TblPessoaEmprestimo>() {
+            @Override
+            public int compare(TblPessoaEmprestimo cat1, TblPessoaEmprestimo cat2) {
+                return cat1.getEmprestimo().getDt_emprestimo().compareTo(cat2.getEmprestimo().getDt_emprestimo());
+            }
+        };
+        Collections.sort(dado, cmp);
         this.tblAguardandoAnalise.setItems(dado);
+
+        tbcDtEmprestimo.setCellFactory(column -> {
+            return new TableCell<TblPessoaEmprestimo, String>() {
+
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    setText(empty ? "" : getItem().toString());
+                    setGraphic(null);
+
+                    TableRow<TblPessoaEmprestimo> currentRow = getTableRow();
+
+                    if (!isEmpty()) {
+                        SimpleDateFormat simple = new SimpleDateFormat("dd/MM/yyyy");
+                        try {
+                            Date dt = simple.parse(getText());
+                            Date actualDt = new Date();
+
+                            if (dt.before(actualDt)) {
+                                currentRow.setStyle("-fx-background-color:lightcoral");
+                            }
+                        } catch (ParseException ex) {
+                            System.out.println(ex.getMessage());
+                        }
+
+                    }
+                }
+            };
+        });
 
     }
 
     void atualizarTabelaAnalise() {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                tableLoading(true);
+            }
+        });
         List<EmprestimoEstoqueMaterial> empm = new ArrayList();
 
         List<Pessoa> listpessoa = NegociosEstaticos.getNegocioPessoa().buscarTodos();
@@ -1254,6 +1519,19 @@ public class AnalisarEmprestimoController implements Initializable {
         tabAnaliseEmprestimo.setDisable(true);
         tabObservacoes.setDisable(true);
         rdbObsIndividual.setSelected(true);
+        tblAguardandoAnalise.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+        tblListaMaterial.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+        tblMaterialObs.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+        tbvLocalListSeparar.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+        tbvMaterialListSeparar.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+        tbvMaterialSeparado.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                tableLoading(true);
+            }
+        });
 
         new Thread() {
             @Override

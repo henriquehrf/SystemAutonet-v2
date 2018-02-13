@@ -186,8 +186,14 @@
                                  <children>
                                     <HBox alignment="TOP_CENTER" prefHeight="44.0" prefWidth="798.0">
                                        <children>
-                                          <Button fx:id="btnSalvarOperacao" mnemonicParsing="false" onAction="#btnSalvarOperacaoOnAction" text="Salvar" />
-                                          <Button fx:id="btnCancelarOperacao" mnemonicParsing="false" onAction="#btnCancelarOperacaoOnAction" text="Cancelar" />
+                                          <Button fx:id="btnSalvarOperacao" mnemonicParsing="false" onAction="#btnSalvarOperacaoOnAction" styleClass="button-save" text="Salvar">
+                                             <HBox.margin>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </HBox.margin></Button>
+                                          <Button fx:id="btnCancelarOperacao" mnemonicParsing="false" onAction="#btnCancelarOperacaoOnAction" styleClass="button-cancel" text="Cancelar">
+                                             <HBox.margin>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </HBox.margin></Button>
                                        </children>
                                     </HBox>
                                  </children>
@@ -242,12 +248,12 @@
                                           </HBox>
                                           <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="300.0">
                                              <children>
-                                                <Button fx:id="btnAdicionarLista" mnemonicParsing="false" onAction="#btnAdicionarListaOnAction" text="+">
+                                                <Button fx:id="btnAdicionarLista" mnemonicParsing="false" onAction="#btnAdicionarListaOnAction" styleClass="button-adicionar">
                                                    <HBox.margin>
                                                       <Insets right="15.0" />
                                                    </HBox.margin>
                                                 </Button>
-                                                <Button fx:id="btnRemoverLista" mnemonicParsing="false" onAction="#btnRemoverListaOnAction" text="-">
+                                                <Button fx:id="btnRemoverLista" mnemonicParsing="false" onAction="#btnRemoverListaOnAction" styleClass="button-remover" text="-">
                                                    <HBox.margin>
                                                       <Insets right="5.0" />
                                                    </HBox.margin>
@@ -311,8 +317,8 @@
                      <children>
                         <ListView fx:id="tblMaterialObs" layoutX="24.0" layoutY="14.0" onMouseClicked="#tblMaterialObsOnMouseClicked" prefHeight="429.0" prefWidth="337.0" />
                         <TextArea fx:id="txtObs" layoutX="380.0" layoutY="96.0" maxHeight="326.0" prefHeight="100.0" prefWidth="386.0" />
-                        <Button fx:id="btnApagarTodasObs" layoutX="581.0" layoutY="19.0" mnemonicParsing="false" onAction="#btnApagarTodasObsOnAction" text="=" />
-                        <Label layoutX="620.0" layoutY="23.0" text="Apagar todas Observações" />
+                        <Button fx:id="btnApagarTodasObs" layoutX="581.0" layoutY="19.0" mnemonicParsing="false" onAction="#btnApagarTodasObsOnAction" styleClass="button-removerTodos" />
+                        <Label layoutX="620.0" layoutY="23.0" text="Apagar todas observações" />
                         <RadioButton fx:id="rdbObsUnica" layoutX="380.0" layoutY="43.0" mnemonicParsing="false" onAction="#rdbObsUnicaOnAction" text="Observação UNICA">
                            <toggleGroup>
                               <ToggleGroup fx:id="TipoObservacao" />

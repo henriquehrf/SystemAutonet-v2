@@ -38,7 +38,7 @@ public class TblPessoaEmprestimo {
 
   
     public String getEmprestimoDt() {
-        SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat dt = new SimpleDateFormat("dd/MM/yyyy");
         return dt.format(emprestimo.getDt_emprestimo());
       
     }

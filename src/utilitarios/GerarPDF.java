@@ -5,24 +5,19 @@
  */
 package utilitarios;
 
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
-import static com.itextpdf.text.pdf.PdfFileSpecification.url;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import vo.EmprestimoEstoqueMaterial;
-import vo.EstoqueMaterial;
 import vo.Material;
 import vo.Pessoa;
 
@@ -110,7 +105,7 @@ public class GerarPDF {
         document.add(new Paragraph(" "));
         String termoCiencia = "Eu " + solicitante.getNome() + ", CPF Nº: " + solicitante.getCpf() + " e portador do Nº Matrícula: " + solicitante.getNum_matricula() + ", reconheço que "
                 + "recebi TODOS os materiais listado no documento acima e prometo utilizar os devidos materiais com responsabilidade "
-                + "e prometo a devolução de todos os materiais.\n\n\n\n"
+                + "e a devolução de todos os materiais.\n\n\n\n"
                 + "Cuiabá - MT, _____/_____/__________ \n\n"
                 + "_______________________________________________\n" + solicitante.getNome() + "\n"
                 + "_______________________________________________\n" + autorizador.getNome() + "\n"

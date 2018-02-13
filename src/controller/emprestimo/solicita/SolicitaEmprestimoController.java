@@ -277,6 +277,7 @@ public class SolicitaEmprestimoController {
                 }
                 htmlTable += "</table></div>";
                 conteudo += htmlTable;
+                htmlTable="";
                 conteudo += "</body></html>";
 
                 conteudo += "<footer><p align=\"center\">Mensagem gerada automáticamente por SystemAutoNet 1.0</p>";
@@ -514,7 +515,7 @@ public class SolicitaEmprestimoController {
 
         this.tbcCategoriaListaMaterial.setCellValueFactory(new PropertyValueFactory<Material, String>("CategoriaNome"));
         this.tbcDescricaoListaMaterial.setCellValueFactory(new PropertyValueFactory<Material, String>("descricao"));
-        this.tbcQuantidadeSolicitadaListaMaterial.setCellValueFactory(new PropertyValueFactory<Material, Integer>("quantidadeSolicitada"));
+        this.tbcQuantidadeSolicitadaListaMaterial.setCellValueFactory(new PropertyValueFactory<Material, Integer>("QuantidadeSolicitadaFormat"));
         tblListaMateriais.setItems(altertab);
     }
 
