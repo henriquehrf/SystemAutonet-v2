@@ -20,12 +20,16 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -40,8 +44,10 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import utilitarios.Alertas;
 import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
+import vo.EstoqueMaterial;
 import vo.Material;
 import vo.Pessoa;
 
@@ -53,46 +59,16 @@ import vo.Pessoa;
 public class DevolverEmprestimoController {
 
     @FXML
-    private Button btnBaixarItensEmprestimo;
-
-    @FXML
-    private Button btnAdicionarLocal;
-
-    @FXML
-    private Button btnBuscarLocalizarEstoque;
-
-    @FXML
-    private Button btnCancelarInformarEstoque;
-
-    @FXML
-    private Tab tabBuscarMaterial;
-
-    @FXML
     private TableColumn<Emprestimo, String> tbcFinalidadeBuscarPorEmprestimo;
 
     @FXML
     private Button btnBuscarEmprestimo;
 
     @FXML
-    private TextArea txtObservacao;
-
-    @FXML
-    private TableColumn<Pessoa, String> tbcMaterialInformarEstoque;
-
-    @FXML
     private DatePicker dtpDtFinal;
 
     @FXML
     private TableColumn<Emprestimo, String> tbcPessoaBuscarEmprestimo;
-
-    @FXML
-    private TableColumn<Emprestimo, String> tbcResponsavelLocalizarEstoque;
-
-    @FXML
-    private Button btnDevolverItensEmprestimo;
-
-    @FXML
-    private Button btnVoltarItensEmprestimo;
 
     @FXML
     private RadioButton rdbFinalidade;
@@ -107,64 +83,10 @@ public class DevolverEmprestimoController {
     private TextField txtBuscadorEmprestimo;
 
     @FXML
-    private TextField txtBuscadorLocalizarEstoque;
-
-    @FXML
     private Button btnConsultarBuscarEmprestimo;
 
     @FXML
-    private TableColumn<?, ?> tbcNumeroLocalizarEstoque;
-
-    @FXML
-    private Button btnEditarLocal;
-
-    @FXML
     private ToggleGroup Filtro;
-
-    @FXML
-    private TableColumn<TblPessoaEmprestimo, String> tbcCategoriaItensEmprestimo;
-
-    @FXML
-    private TableColumn<?, ?> tbcDescricaoLocalInformarEstoque;
-
-    @FXML
-    private TableColumn<TblPessoaEmprestimo, String> tbcMaterialItensEmprestimo;
-
-    @FXML
-    private TableColumn<TblPessoaEmprestimo, Number> tbcQtdItensEmprestimo;
-
-    @FXML
-    private Button btnSalvarInformarEstoque;
-
-    @FXML
-    private TableView<?> tblPrincipalBuscarMaterial;
-
-    @FXML
-    private Button btnSelecionarLocalizarEstoque;
-
-    @FXML
-    private RadioButton rdbDescricao;
-
-    @FXML
-    private Button btnVoltarObservacao;
-
-    @FXML
-    private Label lblDescricao;
-
-    @FXML
-    private TableColumn<?, ?> tbcDescricaoLocalizarEstoque;
-
-    @FXML
-    private RadioButton rdbNumero;
-
-    @FXML
-    private Tab tabItensEmprestimo;
-
-    @FXML
-    private Tab tabObservacao;
-
-    @FXML
-    private TableView<TblEmprestimoEstoque> tblPrincipalItensEmprestimo;
 
     @FXML
     private Button btnVoltarBuscarEmprestimo;
@@ -179,33 +101,129 @@ public class DevolverEmprestimoController {
     private TableView<Emprestimo> tblPrincipalBuscarEmprestimo;
 
     @FXML
-    private Button btnVoltarLocalizarEstoque;
-
-    @FXML
-    private Button btnRemoverLocal;
-
-    @FXML
-    private Button btnImprimirInformarEstoque;
-
-    @FXML
-    private TableColumn<?, ?> tbcDepartamentoLocalizarEstoque;
-
-    @FXML
-    private Tab tabInformarEstoque;
-
-    @FXML
-    private Button btnSalvarObservacao;
-
-    @FXML
     private TabPane PanePrincipal;
 
     @FXML
-    private RadioButton rdbPessoaResponsavel;
+    private TableView<EmprestimoEstoqueMaterial> tblListaMaterial;
 
     @FXML
-    private TableColumn<?, ?> tbcQtdInformarEstoque;
+    private TableColumn<EmprestimoEstoqueMaterial, String> tbcMaterialAnalise;
 
     @FXML
+    private TableColumn<EmprestimoEstoqueMaterial, String> tbcLocalOrigem;
+
+    @FXML
+    private TableColumn<EmprestimoEstoqueMaterial, String> tbcQuantidadeAnalise;
+
+    @FXML
+    private TableColumn<EmprestimoEstoqueMaterial, String> tbcCategoriaAnalise;
+
+    @FXML
+    private Tab tabAnaliseMaterial;
+
+    @FXML
+    private Label lblDtEmprestimo;
+
+    @FXML
+    private Label lblObservacao;
+
+    @FXML
+    private Label lblFinalidade;
+
+    @FXML
+    private Button btnDevolver;
+
+    @FXML
+    private Button btnRetornar;
+
+    @FXML
+    void btnRetornarOnAction(ActionEvent event) {
+
+        tabBuscarEmprestimo.setDisable(false);
+        tabAnaliseMaterial.setDisable(true);
+        tblListaMaterial.getItems().clear();
+        tblListaMaterial.refresh();
+        PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
+
+    }
+
+    void devolucaoAutomatica() {
+        new Thread() {
+            @Override
+            public void run() {
+                List<EmprestimoEstoqueMaterial> devolucao = tblListaMaterial.getItems();
+                List<EstoqueMaterial> estoque = NegociosEstaticos.getNegocioEstoqueMateria().buscarTodosEstoqueMaterial();
+
+                for (EmprestimoEstoqueMaterial vo : devolucao) {
+                    EstoqueMaterial estoqueMaterial = new EstoqueMaterial();
+                    for (EstoqueMaterial est : estoque) {
+                        if (vo.getId_estoquematerial().getId().equals(est.getId())) {
+                            estoqueMaterial = est;
+                            estoqueMaterial.setQuantidade(estoqueMaterial.getQuantidade() + vo.getQtd_emprestada());
+                            estoqueMaterial.setQuantidade_emprestada(estoqueMaterial.getQuantidade_emprestada() - vo.getQtd_emprestada());
+                            try {
+                                NegociosEstaticos.getNegocioEstoqueMateria().salvar(estoqueMaterial);
+                            } catch (Exception ex) {
+                                System.out.println(ex.getMessage());
+                            }
+                            break;
+                        }
+                    }
+
+                }
+
+                Emprestimo emprestimo = tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem();
+
+                emprestimo.setStatus_emprestimo(StatusEmprestimo.FINALIZADO);
+                try {
+                    NegociosEstaticos.getNegocioEmprestimo().salvar(emprestimo);
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                }
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Alertas alerta = new Alertas();
+                        alerta.alerta(Alert.AlertType.INFORMATION, "Operação realizada com sucesso", "A devolução dos materiais foi realizada com sucesso");
+                        Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova revolução?", "Sim", "Não");
+                        if (result) {
+                            carregarTabelaEmprestimo();
+                            PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
+                            tabBuscarEmprestimo.setDisable(false);
+                            tabAnaliseMaterial.setDisable(true);
+
+                        } else {
+                            voltar();
+                        }
+
+                    }
+                });
+
+            }
+        }.start();
+
+    }
+
+    @FXML
+    void btnDevolverOnAction(ActionEvent event) {
+
+        Alertas alert = new Alertas();
+
+        Boolean result = alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação de uma opção", "Qual o método de devolução executar?", "Automático", "Manual");
+        if (result) {
+            result = alert.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Foi selecionado o método AUTOMÁTICO.\nNo método automático TODOS os materiais irão ser devolvidos em seu local de origem antes do empréstimo.\nDeseja "
+                    + "continuar?", "Sim", "Não");
+
+            if (result) {
+                devolucaoAutomatica();
+            }
+        } else {
+            System.out.println("Manual");
+        }
+
+    }
+
     private TableView<?> tblPrincipalInformarEstoque;
 
     List<Emprestimo> ListAllEmprestimo = new ArrayList<>();
@@ -303,38 +321,7 @@ public class DevolverEmprestimoController {
         buscar();
     }
 
-    @FXML
-    void btnDevolverItensEmprestimoOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnBaixarItensEmprestimoOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnVoltarItensEmprestimoOnAction(ActionEvent event) {
-        PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
-        tabBuscarEmprestimo.setDisable(false);
-        tabItensEmprestimo.setDisable(true);
-        tabInformarEstoque.setDisable(true);
-        tabBuscarMaterial.setDisable(true);
-        tabObservacao.setDisable(true);
-    }
-
-    @FXML
-    void btnSalvarInformarEstoqueOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnImprimirInformarEstoqueOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnVoltarBuscarEmprestimo_onAction(ActionEvent event) {
+    void voltar() {
         try {
             Parent root;
             root = FXMLLoader.load(PrincipalController.class.getClassLoader().getResource("fxml/Principal.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
@@ -342,78 +329,52 @@ public class DevolverEmprestimoController {
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
-
     }
 
     @FXML
-    void btnCancelarInformarEstoqueOnAction(ActionEvent event) {
-
+    void btnVoltarBuscarEmprestimo_onAction(ActionEvent event) {
+        voltar();
     }
 
-    @FXML
-    void btnAdicionarLocalOnAction(ActionEvent event) {
+    void completarTabelaMaterial(List<EmprestimoEstoqueMaterial> lista) {
 
+        ObservableList<EmprestimoEstoqueMaterial> dado = FXCollections.observableArrayList();
+        dado.addAll(lista);
+        this.tbcMaterialAnalise.setCellValueFactory(new PropertyValueFactory<EmprestimoEstoqueMaterial, String>("NomeMaterial"));
+        this.tbcQuantidadeAnalise.setCellValueFactory(new PropertyValueFactory<EmprestimoEstoqueMaterial, String>("Qtd_emprestadaFormat"));
+        this.tbcCategoriaAnalise.setCellValueFactory(new PropertyValueFactory<EmprestimoEstoqueMaterial, String>("NomeCategoria"));
+        this.tbcLocalOrigem.setCellValueFactory(new PropertyValueFactory<EmprestimoEstoqueMaterial, String>("LocalOrigemFormat"));
+
+        tblListaMaterial.setItems(dado);
     }
 
-    @FXML
-    void btnEditarLocalOnAction(ActionEvent event) {
+    void completarTableConsultaMaterial() {
+        Emprestimo emp = tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem();
 
-    }
-
-    @FXML
-    void btnRemoverLocalOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnSelecionarLocalizarEstoqueOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnVoltarLocalizarEstoqueOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnBuscarLocalizarEstoqueOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnSalvarObservacaoOnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnVoltarObservacaoOnAction(ActionEvent event) {
+        new Thread() {
+            @Override
+            public void run() {
+                List<EmprestimoEstoqueMaterial> mat = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarTodosIdEmprestimo(emp);
+                completarTabelaMaterial(mat);
+            }
+        }.start();
+        
+        lblDtEmprestimo.setText(emp.getDt_emprestimoString());
+        lblFinalidade.setText(emp.getFinalidade());
+        lblObservacao.setText(emp.getObservacao());
 
     }
 
     @FXML
     void btnConsultarBuscarEmprestimo_onAction(ActionEvent event) {
 
-//        ListaPessoaMaterial.clear();
-//        for (TblPessoaEmprestimo vo : ListaOf) {
-//            if (vo.getEmprestimo() == tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem().getEmprestimo()) {
-//                List<EmprestimoEstoqueMaterial> list = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(vo.getEmprestimo());
-//
-//                for (EmprestimoEstoqueMaterial voe : list) {
-//                    TblEmprestimoEstoque EE = new TblEmprestimoEstoque();
-//                    EE.setEmp(vo.getEmprestimo());
-//                    EE.setEmpEstoque(voe);
-//                    ListaPessoaMaterial.add(EE);
-//                }
-//
-//            }
-//        }
-//        completartblPrincipalItensEmprestimo(ListaPessoaMaterial);
-//        tabBuscarEmprestimo.setDisable(true);
-//        tabItensEmprestimo.setDisable(false);
-//        tabInformarEstoque.setDisable(true);
-//        tabBuscarMaterial.setDisable(true);
-//        tabObservacao.setDisable(true);
-//        PanePrincipal.getSelectionModel().select(tabItensEmprestimo);
+        if (tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem() != null) {
+            completarTableConsultaMaterial();
+            tabBuscarEmprestimo.setDisable(true);
+            tabAnaliseMaterial.setDisable(false);
+            PanePrincipal.getSelectionModel().select(tabAnaliseMaterial);
+        }
+
     }
 
     void carregarTabelaEmprestimo() {
@@ -421,8 +382,9 @@ public class DevolverEmprestimoController {
         new Thread() {
             @Override
             public void run() {
+                ListAllEmprestimo.clear();
                 List<Emprestimo> listEmprestimo = NegociosEstaticos.getNegocioEmprestimo().buscarPorTodos();
-
+                
                 for (Emprestimo vo : listEmprestimo) {
                     if (!vo.getId_pessoa_solicita().getId().equals(ClasseDoSistemaEstatico.getPessoa().getId())) {
                         if (vo.getStatus_emprestimo().equals(StatusEmprestimo.APROVADO)) {
@@ -432,6 +394,7 @@ public class DevolverEmprestimoController {
                 }
 
                 completarTabelaTblPrincipalBuscarEmprestimo(ListAllEmprestimo);
+                tblPrincipalBuscarEmprestimo.refresh();
             }
         }.start();
     }
@@ -439,29 +402,12 @@ public class DevolverEmprestimoController {
     public void initialize() {
         PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
         tabBuscarEmprestimo.setDisable(false);
-        tabItensEmprestimo.setDisable(true);
-        tabInformarEstoque.setDisable(true);
-        tabBuscarMaterial.setDisable(true);
-        tabObservacao.setDisable(true);
+        tabAnaliseMaterial.setDisable(true);
         rdbPessoa.setSelected(true);
 
         carregarTabelaEmprestimo();
 
         // TODO
-    }
-
-    private void completartblPrincipalItensEmprestimo(List<TblEmprestimoEstoque> lista) {
-
-        ObservableList<TblEmprestimoEstoque> dado = FXCollections.observableArrayList();
-        for (int i = 0; i < lista.size(); i++) {
-            dado.add(lista.get(i));
-        }
-
-        this.tbcMaterialItensEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("Material"));
-        this.tbcQtdItensEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, Number>("Quantidade"));
-        this.tbcCategoriaItensEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("Categoria"));
-        this.tblPrincipalItensEmprestimo.setItems(dado);
-
     }
 
     private void completarTabelaTblPrincipalBuscarEmprestimo(List<Emprestimo> lista) {

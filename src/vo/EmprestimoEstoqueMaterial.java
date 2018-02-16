@@ -74,6 +74,10 @@ public class EmprestimoEstoqueMaterial implements Serializable, EntidadeBase {
     public EstoqueMaterial getId_estoquematerial() {
         return id_estoquematerial;
     }
+    
+    public String getLocalOrigemFormat(){
+        return id_estoquematerial.getId_departamento().getDescricao()+" "+id_estoquematerial.getId_departamento().getNumero()+" - "+id_estoquematerial.getId_departamento().getSigla();
+    }
 
     public void setId_estoquematerial(EstoqueMaterial id_estoquematerial) {
         this.id_estoquematerial = id_estoquematerial;
@@ -113,6 +117,10 @@ public class EmprestimoEstoqueMaterial implements Serializable, EntidadeBase {
 
     public Integer getQtd_emprestada() {
         return qtd_emprestada;
+    }
+    
+    public String getQtd_emprestadaFormat(){
+        return qtd_emprestada+" "+id_material.getId_tipo_unidade().getSigla();
     }
 
     public void setQtd_emprestada(Integer qtd_emprestada) {
