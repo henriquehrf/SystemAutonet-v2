@@ -56,7 +56,9 @@ public class NegociosEstaticos {
        negocioFornecedor = new NegocioFornecedor();
        negocioLocal = new NegocioLocal();
        negocioMaterial = new NegocioMaterial();
-       negocioPessoa = new NegocioPessoa();
+         negocioPessoa = new NegocioPessoa();
+  
+      
        negocioTipoSaida = new NegocioTipoSaida();
        negocioTipoUnidade = new NegocioTipoUnidade();
     }    

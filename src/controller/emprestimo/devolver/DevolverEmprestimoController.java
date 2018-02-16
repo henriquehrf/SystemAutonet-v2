@@ -5,12 +5,19 @@
  */
 package controller.emprestimo.devolver;
 
+import classesAuxiliares.ClasseDoSistemaEstatico;
 import classesAuxiliares.NegociosEstaticos;
 import classesAuxiliares.TblEmprestimoEstoque;
 import classesAuxiliares.TblPessoaEmprestimo;
 import controller.PrincipalController;
+import enumm.StatusEmprestimo;
 import gui.SystemAutonet;
+import java.time.ZoneId;
+import static java.time.temporal.TemporalQueries.localDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -31,8 +38,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
+import vo.Material;
 import vo.Pessoa;
 
 /**
@@ -58,7 +68,7 @@ public class DevolverEmprestimoController {
     private Tab tabBuscarMaterial;
 
     @FXML
-    private TableColumn<TblPessoaEmprestimo, String> tbcFinalidadeBuscarPorEmprestimo;
+    private TableColumn<Emprestimo, String> tbcFinalidadeBuscarPorEmprestimo;
 
     @FXML
     private Button btnBuscarEmprestimo;
@@ -73,10 +83,10 @@ public class DevolverEmprestimoController {
     private DatePicker dtpDtFinal;
 
     @FXML
-    private TableColumn<TblPessoaEmprestimo, String> tbcPessoaBuscarEmprestimo;
+    private TableColumn<Emprestimo, String> tbcPessoaBuscarEmprestimo;
 
     @FXML
-    private TableColumn<TblPessoaEmprestimo, String> tbcResponsavelLocalizarEstoque;
+    private TableColumn<Emprestimo, String> tbcResponsavelLocalizarEstoque;
 
     @FXML
     private Button btnDevolverItensEmprestimo;
@@ -85,7 +95,13 @@ public class DevolverEmprestimoController {
     private Button btnVoltarItensEmprestimo;
 
     @FXML
-    private TableColumn<TblPessoaEmprestimo, String> tbcDtEmprestimoBuscarEmprestimo;
+    private RadioButton rdbFinalidade;
+
+    @FXML
+    private RadioButton rdbPessoa;
+
+    @FXML
+    private TableColumn<Emprestimo, String> tbcDtEmprestimoBuscarEmprestimo;
 
     @FXML
     private TextField txtBuscadorEmprestimo;
@@ -160,7 +176,7 @@ public class DevolverEmprestimoController {
     private Tab tabBuscarEmprestimo;
 
     @FXML
-    private TableView<TblPessoaEmprestimo> tblPrincipalBuscarEmprestimo;
+    private TableView<Emprestimo> tblPrincipalBuscarEmprestimo;
 
     @FXML
     private Button btnVoltarLocalizarEstoque;
@@ -192,44 +208,99 @@ public class DevolverEmprestimoController {
     @FXML
     private TableView<?> tblPrincipalInformarEstoque;
 
-    List<TblPessoaEmprestimo> ListaOf = new ArrayList();
-    List<TblEmprestimoEstoque> ListaPessoaMaterial = new ArrayList();
+    List<Emprestimo> ListAllEmprestimo = new ArrayList<>();
+
+    @FXML
+    void rdbPessoaOnAction(ActionEvent event) {
+        buscar();
+    }
+
+    @FXML
+    void rdbFinalidadeOnAction(ActionEvent event) {
+        buscar();
+    }
+
+    void buscar() {
+        new Thread() {
+            @Override
+            public void run() {
+                String txt = txtBuscadorEmprestimo.getText();
+                List<Emprestimo> aux = new ArrayList<>();
+                List<Emprestimo> result = new ArrayList<>();
+                if (rdbPessoa.isSelected()) {
+                    for (Emprestimo vo : ListAllEmprestimo) {
+                        if (vo.getId_pessoa_solicita().getNome().toUpperCase().contains(txt.toUpperCase())) {
+                            aux.add(vo);
+                        }
+                    }
+                }
+                if (rdbFinalidade.isSelected()) {
+                    for (Emprestimo vo : ListAllEmprestimo) {
+                        if (vo.getFinalidade().toUpperCase().contains(txt.toUpperCase())) {
+                            aux.add(vo);
+                        }
+                    }
+                }
+
+                if (dtpDtFinal.getValue() != null && dtpDtInicial.getValue() != null) {
+                    Date dtInicial = Date.from(dtpDtInicial.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                    Date dtFinal = Date.from(dtpDtFinal.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+
+                    for (Emprestimo vo : aux) {
+                        if ((vo.getDt_emprestimo().after(dtInicial) || vo.getDt_emprestimo().equals(dtInicial)) && (vo.getDt_emprestimo().before(dtFinal) || vo.getDt_emprestimo().equals(dtFinal))) {
+                            result.add(vo);
+                        }
+                    }
+                }
+
+                if (dtpDtInicial.getValue() != null && dtpDtFinal.getValue() == null) {
+                    Date dtInicial = Date.from(dtpDtInicial.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                    for (Emprestimo vo : aux) {
+                        if (vo.getDt_emprestimo().after(dtInicial) || vo.getDt_emprestimo().equals(dtInicial)) {
+                            result.add(vo);
+                        }
+                    }
+                }
+
+                if (dtpDtFinal.getValue() != null && dtpDtInicial.getValue() == null) {
+                    Date dtFinal = Date.from(dtpDtFinal.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                    for (Emprestimo vo : aux) {
+                        if (vo.getDt_emprestimo().before(dtFinal) || vo.getDt_emprestimo().equals(dtFinal)) {
+                            result.add(vo);
+                        }
+                    }
+                }
+                if (dtpDtFinal.getValue() != null || dtpDtInicial.getValue() != null) {
+                    completarTabelaTblPrincipalBuscarEmprestimo(result);
+                } else {
+                    completarTabelaTblPrincipalBuscarEmprestimo(aux);
+                }
+
+            }
+        }.start();
+    }
 
     @FXML
     void btnBuscarEmprestimoOnAction(ActionEvent event) {
-        List<Pessoa> listpessoa = new ArrayList();
-        Pessoa p = new Pessoa();
-        p.setNome(txtBuscadorEmprestimo.getText());
 
-        listpessoa = NegociosEstaticos.getNegocioPessoa().buscarPorNome(p);
-        List<EmprestimoEstoqueMaterial> empm = new ArrayList();
+        buscar();
+    }
 
-        for (Pessoa vo : listpessoa) {
-            List<Emprestimo> emp = NegociosEstaticos.getNegocioEmprestimo().buscarPorIdPessoa(vo);
-            for (Emprestimo voEmp : emp) {
-                empm = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(voEmp);
-                if (empm.size() > 0) {
-                    TblPessoaEmprestimo tb = new TblPessoaEmprestimo();
-                    tb.setEmprestimo(voEmp);
-                    tb.setPessoa(vo);
-                    ListaOf.add(tb);
-                    // listEmprestimoNaoDevolvido.add(voEmp);
-
-                }
-            }
-
+    @FXML
+    void btnBuscarEmprestimoOnKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            buscar();
         }
-        completarTabelaTblPrincipalBuscarEmprestimo(ListaOf);
     }
 
     @FXML
     void dtpDtInicialOnAction(ActionEvent event) {
-
+        buscar();
     }
 
     @FXML
     void dtpDtFinalOnAction(ActionEvent event) {
-
+        buscar();
     }
 
     @FXML
@@ -322,28 +393,47 @@ public class DevolverEmprestimoController {
     @FXML
     void btnConsultarBuscarEmprestimo_onAction(ActionEvent event) {
 
-        ListaPessoaMaterial.clear();
-        for (TblPessoaEmprestimo vo : ListaOf) {
-            if (vo.getEmprestimo() == tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem().getEmprestimo()) {
-                List<EmprestimoEstoqueMaterial> list = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(vo.getEmprestimo());
+//        ListaPessoaMaterial.clear();
+//        for (TblPessoaEmprestimo vo : ListaOf) {
+//            if (vo.getEmprestimo() == tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem().getEmprestimo()) {
+//                List<EmprestimoEstoqueMaterial> list = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(vo.getEmprestimo());
+//
+//                for (EmprestimoEstoqueMaterial voe : list) {
+//                    TblEmprestimoEstoque EE = new TblEmprestimoEstoque();
+//                    EE.setEmp(vo.getEmprestimo());
+//                    EE.setEmpEstoque(voe);
+//                    ListaPessoaMaterial.add(EE);
+//                }
+//
+//            }
+//        }
+//        completartblPrincipalItensEmprestimo(ListaPessoaMaterial);
+//        tabBuscarEmprestimo.setDisable(true);
+//        tabItensEmprestimo.setDisable(false);
+//        tabInformarEstoque.setDisable(true);
+//        tabBuscarMaterial.setDisable(true);
+//        tabObservacao.setDisable(true);
+//        PanePrincipal.getSelectionModel().select(tabItensEmprestimo);
+    }
 
-                for (EmprestimoEstoqueMaterial voe : list) {
-                    TblEmprestimoEstoque EE = new TblEmprestimoEstoque();
-                    EE.setEmp(vo.getEmprestimo());
-                    EE.setEmpEstoque(voe);
-                    ListaPessoaMaterial.add(EE);
+    void carregarTabelaEmprestimo() {
+
+        new Thread() {
+            @Override
+            public void run() {
+                List<Emprestimo> listEmprestimo = NegociosEstaticos.getNegocioEmprestimo().buscarPorTodos();
+
+                for (Emprestimo vo : listEmprestimo) {
+                    if (!vo.getId_pessoa_solicita().getId().equals(ClasseDoSistemaEstatico.getPessoa().getId())) {
+                        if (vo.getStatus_emprestimo().equals(StatusEmprestimo.APROVADO)) {
+                            ListAllEmprestimo.add(vo);
+                        }
+                    }
                 }
 
+                completarTabelaTblPrincipalBuscarEmprestimo(ListAllEmprestimo);
             }
-        }
-        completartblPrincipalItensEmprestimo(ListaPessoaMaterial);
-        tabBuscarEmprestimo.setDisable(true);
-        tabItensEmprestimo.setDisable(false);
-        tabInformarEstoque.setDisable(true);
-        tabBuscarMaterial.setDisable(true);
-        tabObservacao.setDisable(true);
-        PanePrincipal.getSelectionModel().select(tabItensEmprestimo);
-
+        }.start();
     }
 
     public void initialize() {
@@ -353,28 +443,10 @@ public class DevolverEmprestimoController {
         tabInformarEstoque.setDisable(true);
         tabBuscarMaterial.setDisable(true);
         tabObservacao.setDisable(true);
+        rdbPessoa.setSelected(true);
 
-//        List<Emprestimo> listEmprestimoNaoDevolvido = new ArrayList();
-        List<EmprestimoEstoqueMaterial> empm = new ArrayList();
+        carregarTabelaEmprestimo();
 
-        List<Pessoa> listpessoa = NegociosEstaticos.getNegocioPessoa().buscarTodos();
-        for (Pessoa vo : listpessoa) {
-            List<Emprestimo> emp = NegociosEstaticos.getNegocioEmprestimo().buscarPorIdPessoaStatusRetirado(vo);
-            for (Emprestimo voEmp : emp) {
-                empm = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarPorNaoDevolvido(voEmp);
-                if (empm.size() > 0) {
-                    TblPessoaEmprestimo tb = new TblPessoaEmprestimo();
-                    tb.setEmprestimo(voEmp);
-                    tb.setPessoa(vo);
-                    ListaOf.add(tb);
-                    // listEmprestimoNaoDevolvido.add(voEmp);
-
-                }
-            }
-
-        }
-
-        completarTabelaTblPrincipalBuscarEmprestimo(ListaOf);
         // TODO
     }
 
@@ -392,16 +464,29 @@ public class DevolverEmprestimoController {
 
     }
 
-    private void completarTabelaTblPrincipalBuscarEmprestimo(List<TblPessoaEmprestimo> lista) {
-        ObservableList<TblPessoaEmprestimo> dado = FXCollections.observableArrayList();
-        for (int i = 0; i < lista.size(); i++) {
-            dado.add(lista.get(i));
-        }
-        System.out.println(lista.size());
+    private void completarTabelaTblPrincipalBuscarEmprestimo(List<Emprestimo> lista) {
+        ObservableList<Emprestimo> dado = FXCollections.observableArrayList();
+        dado.addAll(lista);
+        this.tbcPessoaBuscarEmprestimo.setCellValueFactory(new PropertyValueFactory<Emprestimo, String>("NomePessoaSolicita"));
+        this.tbcDtEmprestimoBuscarEmprestimo.setCellValueFactory(new PropertyValueFactory<Emprestimo, String>("Dt_emprestimoString"));
+        this.tbcFinalidadeBuscarPorEmprestimo.setCellValueFactory(new PropertyValueFactory<Emprestimo, String>("Finalidade"));
 
-        this.tbcPessoaBuscarEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("Nome"));
-        this.tbcDtEmprestimoBuscarEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("EmprestimoDt"));
-        this.tbcFinalidadeBuscarPorEmprestimo.setCellValueFactory(new PropertyValueFactory<TblPessoaEmprestimo, String>("Finalidade"));
+        Comparator<Emprestimo> cmp = new Comparator<Emprestimo>() {
+            @Override
+            public int compare(Emprestimo emp1, Emprestimo emp2) {
+                int x = emp1.getDt_emprestimo().compareTo(emp2.getDt_emprestimo());
+                if (x != 0) {
+                    return x;
+                } else {
+                    Date x1 = ((Emprestimo) emp1).getDt_emprestimo();
+                    Date x2 = ((Emprestimo) emp2).getDt_emprestimo();
+                    return x1.compareTo(x2);
+                }
+            }
+
+        };
+        Collections.sort(dado, cmp);
+
         this.tblPrincipalBuscarEmprestimo.setItems(dado);
     }
 

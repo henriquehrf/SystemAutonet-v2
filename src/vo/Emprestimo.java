@@ -83,7 +83,7 @@ public class Emprestimo implements Serializable, EntidadeBase {
     }
 
     public String getDt_emprestimoString() {
-        SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat dt = new SimpleDateFormat("dd/MM/yyyy");
         return dt.format(dt_emprestimo);
     }
 

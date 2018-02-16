@@ -8,17 +8,14 @@ package controller.emprestimo.solicita;
 import classesAuxiliares.ClasseDoSistemaEstatico;
 import classesAuxiliares.NegociosEstaticos;
 import controller.PrincipalController;
-import controller.cadastro.Consulta.ConsultarUnidadeMedidaController;
 import enumm.PerfilUsuario;
 import enumm.StatusEmprestimo;
 import gui.SystemAutonet;
-import java.awt.FontMetrics;
 import java.io.File;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -50,7 +47,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
-import static javafx.scene.text.Font.font;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -62,8 +58,6 @@ import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
 import vo.Material;
 import vo.Pessoa;
-import wagu.Board;
-import wagu.Table;
 
 /**
  * FXML Controller class
