@@ -156,6 +156,7 @@ public class DevolverEmprestimoController {
 
                 for (EmprestimoEstoqueMaterial vo : devolucao) {
                     EstoqueMaterial estoqueMaterial = new EstoqueMaterial();
+                    EmprestimoEstoqueMaterial eem = vo;
                     for (EstoqueMaterial est : estoque) {
                         if (vo.getId_estoquematerial().getId().equals(est.getId())) {
                             estoqueMaterial = est;
@@ -168,6 +169,14 @@ public class DevolverEmprestimoController {
                             }
                             break;
                         }
+                    }
+                    
+                    eem.setDt_devolucao(new Date());
+                    eem.setQtd_devolvida(eem.getQtd_emprestada());
+                    try {
+                        NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(eem);
+                    } catch (Exception ex) {
+                        System.out.println(ex.getMessage()); 
                     }
 
                 }
@@ -358,7 +367,7 @@ public class DevolverEmprestimoController {
                 completarTabelaMaterial(mat);
             }
         }.start();
-        
+
         lblDtEmprestimo.setText(emp.getDt_emprestimoString());
         lblFinalidade.setText(emp.getFinalidade());
         lblObservacao.setText(emp.getObservacao());
@@ -384,7 +393,7 @@ public class DevolverEmprestimoController {
             public void run() {
                 ListAllEmprestimo.clear();
                 List<Emprestimo> listEmprestimo = NegociosEstaticos.getNegocioEmprestimo().buscarPorTodos();
-                
+
                 for (Emprestimo vo : listEmprestimo) {
                     if (!vo.getId_pessoa_solicita().getId().equals(ClasseDoSistemaEstatico.getPessoa().getId())) {
                         if (vo.getStatus_emprestimo().equals(StatusEmprestimo.APROVADO)) {
