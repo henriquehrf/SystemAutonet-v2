@@ -746,6 +746,10 @@ public class AnalisarEmprestimoController implements Initializable {
         if (!txtQtdDesejada.getText().isEmpty()) {
             qtd = Integer.parseInt(txtQtdDesejada.getText());
         }
+        
+        if(qtd<=0){
+            return;
+        }
 
         Material material = tbvMaterialListSeparar.getSelectionModel().getSelectedItem();
         EstoqueMaterial estoqueMaterial = tbvLocalListSeparar.getSelectionModel().getSelectedItem();
