@@ -10,8 +10,10 @@ import classesAuxiliares.NegociosEstaticos;
 import classesAuxiliares.TblEmprestimoEstoque;
 import classesAuxiliares.TblPessoaEmprestimo;
 import controller.PrincipalController;
+import enumm.PerfilUsuario;
 import enumm.StatusEmprestimo;
 import gui.SystemAutonet;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import static java.time.temporal.TemporalQueries.localDate;
 import java.util.ArrayList;
@@ -28,11 +30,13 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -40,13 +44,18 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import utilitarios.Alertas;
+import utilitarios.EnviarEmail;
+import utilitarios.Mask;
 import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
 import vo.EstoqueMaterial;
@@ -193,9 +202,45 @@ public class DevolverEmprestimoController {
     @FXML
     private Button btnRemoverLista;
 
+    @FXML
+    private AnchorPane AnchorPaneValidation;
+
     List<EstoqueMaterial> todosEstoqueMaterial = new ArrayList<>();
     List<EstoqueMaterial> estoqueMaterialSeparado = new ArrayList<>();
     Alertas alerta = new Alertas();
+    String htmlTable = "";
+    List<Material> materialList = new ArrayList<>();
+
+    void tableLoading(Boolean value) {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (value) {
+                    ProgressIndicator p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    HBox h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblPrincipalBuscarEmprestimo.setPlaceholder(h);
+                    p = new ProgressIndicator();
+                    p.setPrefSize(50, 50);
+                    p.setStyle("-fx-progress-color:green;");
+                    h = new HBox(p);
+                    h.setPrefSize(50, 50);
+                    h.setAlignment(Pos.CENTER);
+                    tblListaMaterial.setPlaceholder(h);
+                } else {
+                    tblPrincipalBuscarEmprestimo.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tbvMaterialListSeparar.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tbvLocalListSeparar.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                    tbvMaterialSeparado.setPlaceholder(new Label("Não há conteúdo a ser exibido na tabela"));
+                }
+            }
+        });
+
+    }
 
     @FXML
     void btnRemoverListaOnAction(ActionEvent event) {
@@ -241,13 +286,36 @@ public class DevolverEmprestimoController {
 
         try {
             if (txtQtdDesejada.getText().isEmpty() || txtLocalEscolhido.getText().isEmpty() || txtMaterialEscolhido.getText().isEmpty()) {
+                if (txtMaterialEscolhido.getText().isEmpty()) {
+                    txtMaterialEscolhido.setStyle("-fx-border-color:red");
+                    alerta.alerta(Alert.AlertType.WARNING, "Operação inválida", "É obrigatório a seleção de um material da lista");
+                    return;
+                } else {
+                    txtMaterialEscolhido.setStyle("-fx-border-color:darkgrey");
+                }
+                if (txtLocalEscolhido.getText().isEmpty()) {
+                    txtLocalEscolhido.setStyle("-fx-border-color:red");
+                    alerta.alerta(Alert.AlertType.WARNING, "Operação inválida", "É obrigatório a seleção de um local da lista");
+                    return;
+                } else {
+                    txtLocalEscolhido.setStyle("-fx-border-color:darkgrey");
+                }
+                if (txtQtdDesejada.getText().isEmpty()) {
+                    txtQtdDesejada.setStyle("-fx-border-color:red");
+                    alerta.alerta(Alert.AlertType.WARNING, "Operação inválida", "É obrigatório informar uma quantidade válida do material");
+                    return;
+                } else {
+                    txtQtdDesejada.setStyle("-fx-border-color:darkgrey");
+                }
                 return;
             }
 
             int qtd = Integer.parseInt(txtQtdDesejada.getText());
             if (qtd <= 0) {
+                alerta.alerta(Alert.AlertType.WARNING, "Operação inválida", "Quantidade inválida de material");
                 return;
             }
+            txtQtdDesejada.setStyle("-fx-border-color:darkgrey");
             Material material = tbvMaterialListSeparar.getSelectionModel().getSelectedItem();
             EstoqueMaterial estoqueLocal = tbvLocalListSeparar.getSelectionModel().getSelectedItem();
             EstoqueMaterial estq = new EstoqueMaterial();
@@ -287,6 +355,9 @@ public class DevolverEmprestimoController {
 
                 tbvLocalListSeparar.getSelectionModel().select(null);
                 tbvMaterialListSeparar.getSelectionModel().select(null);
+            } else {
+                alerta.alerta(Alert.AlertType.WARNING, "Operação inválida", "Quantidade inválida de material");
+                return;
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -383,6 +454,8 @@ public class DevolverEmprestimoController {
     void btnSalvarOperacaoOnAction(ActionEvent event) {
 
         if (tbvMaterialSeparado.getItems().size() == 0) {
+
+            alerta.alerta(Alert.AlertType.ERROR, "Não foi possível completar a operação", "Há materiais não separado para a devolução");
             return;
         }
         Boolean result = false;
@@ -405,10 +478,92 @@ public class DevolverEmprestimoController {
         }
 
         if (result) {
-            devolucaoParcial(true);
+            devolucaoParcial();
         } else {
             return;
         }
+    }
+
+    void table(String quantidade, String material, String categoria) {
+        System.out.println(quantidade);
+        System.out.println(material);
+        System.out.println(categoria);
+        System.out.println("Porrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrra");
+        htmlTable += "<tr><td>" + quantidade + "</td><td>" + material + " </td> <td>" + categoria + "</td></tr>";
+    }
+
+    void mandarEmail(Boolean option, Boolean isDevAutomatico) {
+        String conteudo = "";
+        String pattern = "dd/MM/yyyy";
+        Date dt = new Date();
+        SimpleDateFormat dt_format = new SimpleDateFormat(pattern);
+        String remetente = "";
+        String assunto = "";
+
+        if (option) {
+            assunto = "SystemAutoNet - Devolução PARCIAL de Materiais de Empréstimo";
+        } else {
+            assunto = "SystemAutoNet - Devolução TOTAL de Materiais de Empréstimo";
+        }
+
+        conteudo += "<html><body>";
+        conteudo += "<p align=\"center\"><b>LISTA DE MATERIAIS DEVOLVIDOS</b></p>";
+        conteudo += "<p><b>USUÁRIO </b>: " + tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem().getId_pessoa_solicita().getNome() + "</p>";
+        conteudo += "<p><b>DATA PARA EMPRÉSTIMO</b>: " + lblDtEmprestimo.getText() + "</p>";
+        conteudo += "<p><b>FINALIDADE</b>: " + lblFinalidade.getText().toUpperCase() + "</p>";
+        conteudo += "<p><b>OBSERVAÇÃO</b>: " + lblObservacao.getText().toUpperCase() + "</p>";
+        conteudo += "<p align=\"center\"><b>LISTA DE MATERIAIS</b></p>";
+        conteudo += "<p> </div>";
+
+        htmlTable += "<style>\n"
+                + "table, th, td {\n"
+                + "border: 1px solid black;\n"
+                + "border-collapse: collapse;\n"
+                + "}\n"
+                + "td {align=center;}\n"
+                + "</style>";
+
+        htmlTable += "<div><table style=\"width:100%\">";
+        htmlTable += "<tr><td><b>QUANTIDADE</b></td><td><b>MATERIAL</b></td> <td><b>CATEGORIA</b> </td></tr>";
+
+        if (!isDevAutomatico) {
+            for (Material vo : materialList) {
+                vo.setQuantidadeSolicitada(0);
+            }
+            for (EstoqueMaterial vo : tbvMaterialSeparado.getItems()) {
+                for (Material mat : materialList) {
+                    if (vo.getId_material().getId().equals(mat.getId())) {
+                        mat.setQuantidadeSolicitada(mat.getQuantidadeSolicitada() + vo.getQuantidade());
+                    }
+                }
+            }
+            for (Material vo : materialList) {
+                if (vo.getQuantidadeSolicitada() > 0) {
+                    table(vo.getQuantidadeSolicitadaFormat(), vo.getDescricao(), vo.getId_categoria().getDescricao());
+                }
+            }
+        } else {
+            for (Material vo : materialList) {
+                if (vo.getQuantidadeSolicitada() > 0) {
+                    table(vo.getQuantidadeSolicitadaFormat(), vo.getDescricao(), vo.getId_categoria().getDescricao());
+                }
+            }
+        }
+
+        htmlTable += "</table></div>";
+        conteudo += htmlTable;
+        conteudo += "<p> </p>";
+        conteudo += "</body></html>";
+
+        conteudo += "<footer><p align=\"center\">Mensagem gerada automáticamente por SystemAutoNet 1.0</p>";
+        conteudo += "<p align=\"center\"><b>Não responder essa mensagem</b></p></footer>";
+
+        EnviarEmail email = new EnviarEmail();
+
+        remetente = tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem().getId_pessoa_solicita().getEmail();
+        email.enviarEmail(remetente, conteudo, assunto);
+        htmlTable = "";
+
     }
 
     void limparSepararMaterial() {
@@ -426,13 +581,14 @@ public class DevolverEmprestimoController {
         txtQtdDesejada.setText("");
         txtMaterialEscolhido.setText("");
         txtLocalEscolhido.setText("");
+
+        materialList.clear();
     }
 
     @FXML
     void btnCancelarOperacaoOnAction(ActionEvent event) {
 
         Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja desistir de separar os materiais?\n\nATENÇÃO - Todas ações realizadas até o momento não serão salvas", "Sim, confirmo", "Não, quero voltar");
-        System.out.println("Entrei");
         if (result) {
             PanePrincipal.getSelectionModel().select(tabAnaliseMaterial);
             tabAnaliseMaterial.setDisable(false);
@@ -456,6 +612,8 @@ public class DevolverEmprestimoController {
 
     void devolucaoTotal() {
 
+        Platform.runLater(() -> AnchorPaneValidation.setVisible(true));
+
         new Thread() {
             @Override
             public void run() {
@@ -463,17 +621,19 @@ public class DevolverEmprestimoController {
                 Emprestimo emp = NegociosEstaticos.getNegocioEmprestimo().consultarPorId(tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem());
                 emp.setStatus_emprestimo(StatusEmprestimo.FINALIZADO);
                 try {
-                    devolucaoParcial(false);
+                    devolver();
                     NegociosEstaticos.getNegocioEmprestimo().salvar(emp);
+                    mandarEmail(false, false);
                 } catch (Exception ex) {
-                    System.out.println(ex.getMessage());
+                    Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                    Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
                 }
 
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
                         alerta.alerta(Alert.AlertType.INFORMATION, "Operação realizada com sucesso", "A devolução dos materiais foi realizada com sucesso");
-                        Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova revolução?", "Sim", "Não");
+                        Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova devolução?", "Sim", "Não");
                         if (result) {
                             carregarTabelaEmprestimo();
                             limparSepararMaterial();
@@ -487,85 +647,95 @@ public class DevolverEmprestimoController {
 
                     }
                 });
+                Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
             }
         }.start();
     }
 
-    void devolucaoParcial(Boolean option) {
+    void devolver() {
+        List<EstoqueMaterial> estoqueMaterial = NegociosEstaticos.getNegocioEstoqueMateria().buscarTodosEstoqueMaterial();
+        List<EmprestimoEstoqueMaterial> eem = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarTodosIdEmprestimo(tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem());
+
+        for (EstoqueMaterial vo : tbvMaterialSeparado.getItems()) {
+            for (EstoqueMaterial estq : estoqueMaterial) {
+                if (vo.getId().equals(estq.getId())) {
+
+                    estq.setQuantidade_emprestada(estq.getQuantidade_emprestada() - vo.getQuantidade());
+                    estq.setQuantidade(estq.getQuantidade() + vo.getQuantidade());
+                    try {
+                        NegociosEstaticos.getNegocioEstoqueMateria().salvar(estq);
+                    } catch (Exception ex) {
+                        Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                        Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
+                    }
+
+                    break;
+                }
+            }
+            for (EmprestimoEstoqueMaterial emprestimo : eem) {
+
+                if (emprestimo.getId_material().getId().equals(vo.getId_material().getId())
+                        && (emprestimo.getQtd_emprestada() - emprestimo.getQtd_devolvida()) > 0) {
+
+                    emprestimo.setDt_devolucao(new Date());
+
+                    int qtd = emprestimo.getQtd_emprestada() - emprestimo.getQtd_devolvida();
+
+                    if (vo.getQuantidade() <= qtd) {
+                        emprestimo.setQtd_devolvida(emprestimo.getQtd_devolvida() + vo.getQuantidade());
+                        try {
+                            NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(emprestimo);
+                        } catch (Exception ex) {
+                            Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                            Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
+                        }
+                        break;
+                    }
+                    if (vo.getQuantidade() > qtd) {
+                        emprestimo.setQtd_devolvida(emprestimo.getQtd_devolvida() + qtd);
+                        vo.setQuantidade(vo.getQuantidade() - qtd);
+                        try {
+                            NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(emprestimo);
+                        } catch (Exception ex) {
+                            Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                            Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    void devolucaoParcial() {
+
+        Platform.runLater(() -> AnchorPaneValidation.setVisible(true));
 
         new Thread() {
             @Override
             public void run() {
-                List<EstoqueMaterial> estoqueMaterial = NegociosEstaticos.getNegocioEstoqueMateria().buscarTodosEstoqueMaterial();
-                List<EmprestimoEstoqueMaterial> eem = NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().consultarTodosIdEmprestimo(tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem());
+                devolver();
+                mandarEmail(true, false);
 
-                for (EstoqueMaterial vo : tbvMaterialSeparado.getItems()) {
-                    for (EstoqueMaterial estq : estoqueMaterial) {
-                        if (vo.getId().equals(estq.getId())) {
+                Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        alerta.alerta(Alert.AlertType.INFORMATION, "Operação realizada com sucesso", "A devolução dos materiais foi realizada com sucesso");
+                        Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova devolução?", "Sim", "Não");
+                        if (result) {
+                            carregarTabelaEmprestimo();
+                            limparSepararMaterial();
+                            PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
+                            tabBuscarEmprestimo.setDisable(false);
+                            tabAnaliseMaterial.setDisable(true);
 
-                            estq.setQuantidade_emprestada(estq.getQuantidade_emprestada() - vo.getQuantidade());
-                            estq.setQuantidade(estq.getQuantidade() + vo.getQuantidade());
-                            try {
-                                NegociosEstaticos.getNegocioEstoqueMateria().salvar(estq);
-                            } catch (Exception ex) {
-                                System.out.println(ex.getMessage());
-                            }
-
-                            break;
+                        } else {
+                            voltar();
                         }
+
                     }
-                    for (EmprestimoEstoqueMaterial emprestimo : eem) {
-
-                        if (emprestimo.getId_material().getId().equals(vo.getId_material().getId())
-                                && (emprestimo.getQtd_emprestada() - emprestimo.getQtd_devolvida()) > 0) {
-
-                            emprestimo.setDt_devolucao(new Date());
-
-                            int qtd = emprestimo.getQtd_emprestada() - emprestimo.getQtd_devolvida();
-
-                            if (vo.getQuantidade() <= qtd) {
-                                emprestimo.setQtd_devolvida(emprestimo.getQtd_devolvida() + vo.getQuantidade());
-                                try {
-                                    NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(emprestimo);
-                                } catch (Exception ex) {
-                                    System.out.println(ex.getMessage());
-                                }
-                                break;
-                            }
-                            if (vo.getQuantidade() > qtd) {
-                                emprestimo.setQtd_devolvida(emprestimo.getQtd_devolvida() + qtd);
-                                vo.setQuantidade(vo.getQuantidade() - qtd);
-                                try {
-                                    NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(emprestimo);
-                                } catch (Exception ex) {
-                                    System.out.println(ex.getMessage());
-                                }
-                            }
-
-                        }
-                    }
-                }
-
-                if (option) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            alerta.alerta(Alert.AlertType.INFORMATION, "Operação realizada com sucesso", "A devolução dos materiais foi realizada com sucesso");
-                            Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova revolução?", "Sim", "Não");
-                            if (result) {
-                                carregarTabelaEmprestimo();
-                                limparSepararMaterial();
-                                PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
-                                tabBuscarEmprestimo.setDisable(false);
-                                tabAnaliseMaterial.setDisable(true);
-
-                            } else {
-                                voltar();
-                            }
-
-                        }
-                    });
-                }
+                });
 
             }
         }.start();
@@ -573,6 +743,9 @@ public class DevolverEmprestimoController {
     }
 
     void devolucaoAutomatica() {
+
+        Platform.runLater(() -> AnchorPaneValidation.setVisible(true));
+
         new Thread() {
             @Override
             public void run() {
@@ -590,7 +763,8 @@ public class DevolverEmprestimoController {
                             try {
                                 NegociosEstaticos.getNegocioEstoqueMateria().salvar(estoqueMaterial);
                             } catch (Exception ex) {
-                                System.out.println(ex.getMessage());
+                                Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                                Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
                             }
                             break;
                         }
@@ -601,7 +775,8 @@ public class DevolverEmprestimoController {
                     try {
                         NegociosEstaticos.getNegocioEmprestiomEstoqueMaterial().salvar(eem);
                     } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
+                        Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                        Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
                     }
 
                 }
@@ -611,15 +786,18 @@ public class DevolverEmprestimoController {
                 emprestimo.setStatus_emprestimo(StatusEmprestimo.FINALIZADO);
                 try {
                     NegociosEstaticos.getNegocioEmprestimo().salvar(emprestimo);
+                    atualizarListaMaterial();
+                    mandarEmail(false, true);
                 } catch (Exception ex) {
-                    System.out.println(ex.getMessage());
+                    Platform.runLater(() -> alerta.alerta(Alert.AlertType.ERROR, "Foi encontrado um erro na operação", ex.getMessage()));
+                    Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
                 }
 
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
                         alerta.alerta(Alert.AlertType.INFORMATION, "Operação realizada com sucesso", "A devolução dos materiais foi realizada com sucesso");
-                        Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova revolução?", "Sim", "Não");
+                        Boolean result = alerta.alerta(Alert.AlertType.CONFIRMATION, "Aguardando a confirmação do usuário", "Deseja realizar uma nova devolução?", "Sim", "Não");
                         if (result) {
                             carregarTabelaEmprestimo();
                             PanePrincipal.getSelectionModel().select(tabBuscarEmprestimo);
@@ -632,10 +810,45 @@ public class DevolverEmprestimoController {
 
                     }
                 });
-
+                Platform.runLater(() -> AnchorPaneValidation.setVisible(false));
             }
         }.start();
 
+    }
+
+    void atualizarListaMaterial() {
+        materialList = new ArrayList<>();
+        Boolean isAdd = true;
+        for (EmprestimoEstoqueMaterial vo : tblListaMaterial.getItems()) {
+            if (materialList.isEmpty()) {
+                Material mat = new Material();
+                mat.setQuantidadeSolicitada(vo.getQtd_emprestada());
+                mat.setId_material(vo.getId_material().getId());
+                mat.setId_categoria(vo.getId_material().getId_categoria());
+                mat.setUnidadeMedida(vo.getId_material().getId_tipo_unidade().getSigla());
+                mat.setDescricao(vo.getId_material().getDescricao());
+                materialList.add(mat);
+            } else {
+                for (Material mat : materialList) {
+                    if (vo.getId_material().getId().equals(mat.getId())) {
+                        mat.setQuantidadeSolicitada(mat.getQuantidadeSolicitada() + vo.getQtd_emprestada());
+                        isAdd = false;
+                    }
+                }
+                if (vo.getQtd_emprestada() - vo.getQtd_devolvida() > 0) {
+                    if (isAdd) {
+                        Material mat = new Material();
+                        mat.setQuantidadeSolicitada(vo.getQtd_emprestada() - vo.getQtd_devolvida());
+                        mat.setId_material(vo.getId_material().getId());
+                        mat.setId_categoria(vo.getId_material().getId_categoria());
+                        mat.setUnidadeMedida(vo.getId_material().getId_tipo_unidade().getSigla());
+                        mat.setDescricao(vo.getId_material().getDescricao());
+                        materialList.add(mat);
+                    }
+                }
+                isAdd = true;
+            }
+        }
     }
 
     void devolucaoManual() {
@@ -647,40 +860,8 @@ public class DevolverEmprestimoController {
             @Override
             public void run() {
                 todosEstoqueMaterial = NegociosEstaticos.getNegocioEstoqueMateria().buscarTodosEstoqueMaterial();
-                List<Material> material = new ArrayList<>();
-                Boolean isAdd = true;
-                for (EmprestimoEstoqueMaterial vo : tblListaMaterial.getItems()) {
-                    if (material.isEmpty()) {
-                        Material mat = new Material();
-                        mat.setQuantidadeSolicitada(vo.getQtd_emprestada());
-                        mat.setId_material(vo.getId_material().getId());
-                        mat.setId_categoria(vo.getId_material().getId_categoria());
-                        mat.setUnidadeMedida(vo.getId_material().getId_tipo_unidade().getSigla());
-                        mat.setDescricao(vo.getId_material().getDescricao());
-                        material.add(mat);
-                    } else {
-                        for (Material mat : material) {
-                            if (vo.getId_material().getId().equals(mat.getId())) {
-                                mat.setQuantidadeSolicitada(mat.getQuantidadeSolicitada() + vo.getQtd_emprestada());
-                                isAdd = false;
-                            }
-                        }
-                        if (vo.getQtd_emprestada() - vo.getQtd_devolvida() > 0) {
-                            if (isAdd) {
-                                Material mat = new Material();
-                                mat.setQuantidadeSolicitada(vo.getQtd_emprestada() - vo.getQtd_devolvida());
-                                mat.setId_material(vo.getId_material().getId());
-                                mat.setId_categoria(vo.getId_material().getId_categoria());
-                                mat.setUnidadeMedida(vo.getId_material().getId_tipo_unidade().getSigla());
-                                mat.setDescricao(vo.getId_material().getDescricao());
-                                material.add(mat);
-                            }
-                        }
-                        isAdd = true;
-                    }
-                }
-
-                completarTabelaAnaliseMaterial(material);
+                atualizarListaMaterial();
+                completarTabelaAnaliseMaterial(materialList);
             }
         }.start();
 
@@ -849,6 +1030,12 @@ public class DevolverEmprestimoController {
 
     void completarTabelaMaterial(List<EmprestimoEstoqueMaterial> lista) {
 
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
+
         ObservableList<EmprestimoEstoqueMaterial> dado = FXCollections.observableArrayList();
         dado.addAll(lista);
         this.tbcMaterialAnalise.setCellValueFactory(new PropertyValueFactory<EmprestimoEstoqueMaterial, String>("NomeMaterial"));
@@ -860,6 +1047,14 @@ public class DevolverEmprestimoController {
     }
 
     void completarTableConsultaMaterial() {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                tableLoading(true);
+                btnDevolver.setDisable(true);
+            }
+        });
         Emprestimo emp = tblPrincipalBuscarEmprestimo.getSelectionModel().getSelectedItem();
 
         new Thread() {
@@ -876,6 +1071,7 @@ public class DevolverEmprestimoController {
                 }
 
                 completarTabelaMaterial(aux);
+                Platform.runLater(() -> btnDevolver.setDisable(false));
             }
         }.start();
 
@@ -898,6 +1094,13 @@ public class DevolverEmprestimoController {
     }
 
     void carregarTabelaEmprestimo() {
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                tableLoading(true);
+            }
+        });
 
         new Thread() {
             @Override
@@ -925,13 +1128,29 @@ public class DevolverEmprestimoController {
         tabAnaliseMaterial.setDisable(true);
         rdbPessoa.setSelected(true);
         tabItensSeparado.setDisable(true);
+        AnchorPaneValidation.setVisible(false);
 
         carregarTabelaEmprestimo();
+
+        txtQtdDesejada.setTextFormatter(new TextFormatter<>(c
+                -> {
+            if (c.getControlNewText().isEmpty()) {
+                return c;
+            }
+            Mask mask = new Mask();
+            c.setText(mask.OnlyInt(c.getText()));
+            return c;
+        }));
 
         // TODO
     }
 
     private void completarTabelaTblPrincipalBuscarEmprestimo(List<Emprestimo> lista) {
+        if (lista.size() == 0) {
+            tableLoading(false);
+        } else {
+            tableLoading(true);
+        }
         ObservableList<Emprestimo> dado = FXCollections.observableArrayList();
         dado.addAll(lista);
         this.tbcPessoaBuscarEmprestimo.setCellValueFactory(new PropertyValueFactory<Emprestimo, String>("NomePessoaSolicita"));
