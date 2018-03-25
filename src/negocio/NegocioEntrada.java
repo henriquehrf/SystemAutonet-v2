@@ -6,6 +6,7 @@
 package negocio;
 
 import DAO.EntradaDAO;
+import java.util.List;
 import vo.Entrada;
 
 /**
@@ -34,6 +35,10 @@ public class NegocioEntrada {
     
     public Entrada consultarPorId(Entrada entrada){
         return entradaDAO.consutarPorId(Entrada.class, entrada);
+    }
+    
+    public List<Entrada> buscarTodos(){
+        return entradaDAO.buscarTodasEntrada();
     }
         
     private String validar(Entrada entrada){

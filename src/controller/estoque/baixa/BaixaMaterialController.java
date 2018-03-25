@@ -5,11 +5,13 @@
  */
 package controller.estoque.baixa;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import classesAuxiliares.NegociosEstaticos;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -20,14 +22,19 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import vo.EstoqueMaterial;
+import vo.Fornecedor;
+import vo.Local;
+import vo.Material;
 
 /**
  * FXML Controller class
  *
  * @author Henrique
  */
-public class BaixaMaterialController  {
-    
+public class BaixaMaterialController {
+
     @FXML
     private Button btnAdicionar;
 
@@ -38,13 +45,13 @@ public class BaixaMaterialController  {
     private Button btnExclur;
 
     @FXML
-    private TableColumn<?, ?> tbcCategoriaListaMaterial;
+    private TableColumn<EstoqueMaterial, String> tbcCategoriaListaMaterial;
 
     @FXML
     private Button btnBaixar;
 
     @FXML
-    private TableColumn<?, ?> tbcDescricaoListaMaterial;
+    private TableColumn<EstoqueMaterial, String> tbcDescricaoListaMaterial;
 
     @FXML
     private TextField txtBuscador;
@@ -53,13 +60,13 @@ public class BaixaMaterialController  {
     private TableColumn<?, ?> tbcQuantidadeDisponivelBuscaMaterial;
 
     @FXML
-    private TableColumn<?, ?> tbcQuantidadeSolicitadaListaMaterial;
+    private TableColumn<EstoqueMaterial, String> tbcQuantidadeSolicitadaListaMaterial;
 
     @FXML
     private Tab tabBuscarMaterial;
 
     @FXML
-    private ComboBox<?> cbmTipoBaixa;
+    private ComboBox<String> cbmTipoBaixa;
 
     @FXML
     private Button btnVoltar;
@@ -89,16 +96,13 @@ public class BaixaMaterialController  {
     private Tab tabObservacao;
 
     @FXML
-    private TableView<?> tblListaMateriais;
+    private TableView<EstoqueMaterial> tblListaMateriais;
 
     @FXML
     private TextField txtFinalidade;
 
     @FXML
     private TableColumn<?, ?> tbcMaterialBuscaMaterial;
-
-    @FXML
-    private Button btnEditar;
 
     @FXML
     private Tab tabListaMaterial;
@@ -165,9 +169,29 @@ public class BaixaMaterialController  {
 
     }
 
- 
+    void mockTable() {
+        ObservableList<EstoqueMaterial> estoqueMaterial = FXCollections.observableArrayList();
+        List<EstoqueMaterial> list =new ArrayList<>();
+        list = NegociosEstaticos.getNegocioEstoqueMateria().buscarTodosEstoqueMaterial();
+        list=list.subList(0, 1);
+        list.get(0).setQuantidade(5);
+        estoqueMaterial.addAll(list);
+        
+
+        this.tbcDescricaoListaMaterial.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("MaterialDescricao"));
+        this.tbcQuantidadeSolicitadaListaMaterial.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("QtdDisponivelFormat"));
+        this.tbcCategoriaListaMaterial.setCellValueFactory(new PropertyValueFactory<EstoqueMaterial, String>("LocalDescricao"));
+        tblListaMateriais.setItems(estoqueMaterial);
+    }
+
     public void initialize() {
+
+        ObservableList<String> cmb = FXCollections.observableArrayList();
+        cmb.add("Perda/Extravio");
+        cbmTipoBaixa.setItems(cmb);
+        tabListaMaterial.setDisable(true);
+        mockTable();
         // TODO
-    }    
-    
+    }
+
 }

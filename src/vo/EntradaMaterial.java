@@ -15,14 +15,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Transient;
 import utilitarios.Mask;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "EntradaMaterial.BuscarPorEntrada", query = "Select e from EntradaMaterial e WHERE e.id_entrada.id_entrada = :idEntrada ORDER BY(e.id_entrada.dt_entrada)"),
+})
 
 public class EntradaMaterial implements Serializable, EntidadeBase {
 

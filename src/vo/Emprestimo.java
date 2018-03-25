@@ -30,7 +30,7 @@ import javax.persistence.Temporal;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 @Entity
 @NamedQueries({

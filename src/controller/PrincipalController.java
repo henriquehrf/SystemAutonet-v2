@@ -64,22 +64,19 @@ public class PrincipalController {
     private MenuItem cad_departamento;
 
     @FXML
-    private MenuItem cons_material;
-
-    @FXML
-    private MenuItem cons_pessoa;
+    private MenuItem mnu_Item_cons_estoque;
 
     @FXML
     private MenuItem ajuda_manualSistema;
+
+    @FXML
+    private MenuItem mnuItemTransferirMaterial;
 
     @FXML
     private Menu mnu_ajuda;
 
     @FXML
     private MenuItem cad_pessoa;
-
-    @FXML
-    private MenuItem cons_local;
 
     @FXML
     private MenuItem cad_unidadeMedida;
@@ -91,19 +88,10 @@ public class PrincipalController {
     private Menu cons_mnu_Movimetacoes;
 
     @FXML
-    private MenuItem cons_fornecedor;
-
-    @FXML
     private MenuItem emp_analisar;
 
     @FXML
-    private MenuItem cons_mov_saidaMaterial;
-
-    @FXML
     private MenuItem cad_fornecedor;
-
-    @FXML
-    private MenuItem cons_emprestimo;
 
     @FXML
     private MenuItem emp_solicitar;
@@ -132,14 +120,15 @@ public class PrincipalController {
 
     public void initialize() {
         btnLogoff.setFocusTraversable(false);
+        mnuItemTransferirMaterial.setVisible(false);
 
-        Date date = ClasseDoSistemaEstatico.getPessoa().getUltimo_acesso();
+        //  Date date = ClasseDoSistemaEstatico.getPessoa().getUltimo_acesso();
+        Date date = new Date();
         Format formatter = new SimpleDateFormat("dd/MM/yyyy");
 
         msg += ClasseDoSistemaEstatico.getPessoa().getNome();
         msg += "\nÚltimo Acesso: " + formatter.format(date);
         msg += "\nPerfil de Usuário: " + ClasseDoSistemaEstatico.getPessoa().getFuncao();
-        msg += "\nVocê não tem nenhuma mensagem ativa";
 
         txtDadosPessoais.setText(msg);
 //           List<Emprestimo> emp = NegociosEstaticos.getNegocioEmprestimo().buscarPorIdPessoa(ClasseDoSistemaEstatico.getPessoa());
@@ -171,6 +160,44 @@ public class PrincipalController {
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
+
+    }
+
+    @FXML
+    void cons_mov_entradaMaterialOnAction(ActionEvent event) {
+        try {
+            Parent root;
+            root = FXMLLoader.load(ConsultarDepartamentoController.class.getClassLoader().getResource("fxml/consulta/Estoque/Consultar_EntradaMaterial.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
+            SystemAutonet.SCENE.setRoot(root);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    @FXML
+    void mnu_Item_cons_estoqueOnAction(ActionEvent event) {
+        try {
+            Parent root;
+            root = FXMLLoader.load(ConsultarDepartamentoController.class.getClassLoader().getResource("fxml/consulta/Estoque/Consultar_Estoque.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
+            SystemAutonet.SCENE.setRoot(root);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    @FXML
+    void est_baixarMaterialOnAction(ActionEvent event) {
+        try {
+            Parent root;
+            root = FXMLLoader.load(ConsultarDepartamentoController.class.getClassLoader().getResource("fxml/estoque/Baixa/BaixaMaterial.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
+            SystemAutonet.SCENE.setRoot(root);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    @FXML
+    void mnuItemTransferirMaterialOnAction(ActionEvent event) {
 
     }
 

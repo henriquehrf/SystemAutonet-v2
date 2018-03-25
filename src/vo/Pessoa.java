@@ -28,7 +28,7 @@ import javax.persistence.Transient;
 
 /**
  *
- * @author Eduardo WHERE(p.ativo = :ativo)
+ * @author Henrique WHERE(p.ativo = :ativo)
  */
 @Entity
 @NamedQueries({

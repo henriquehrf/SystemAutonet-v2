@@ -5,6 +5,7 @@ package vo;
 
 import DAO.EntidadeBase;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -14,13 +15,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import utilitarios.Mask;
 
 /**
- * @author Eduardo
+ * @author Henrique
  */
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "Entrada.BuscarTodos", query = "Select e from Entrada e ORDER BY(e.dt_entrada)"),
+})
 public class Entrada implements Serializable, EntidadeBase {
 
     @Id
@@ -80,6 +87,19 @@ public class Entrada implements Serializable, EntidadeBase {
     public float getValor_total() {
         return this.valor_total;
     }
+    
+    public String getValorTotalFormat(){
+       String value=""+getValor_total();
+        if (value.length() > 0) {
+            int i = value.length();
+            i = i - (value.indexOf("."));
+            if (i == 2) {
+                value += "0";
+            }
+        }
+        Mask mask =new Mask();
+        return mask.Monetaria(value);
+    }
 
     public void setValor_total(float valor_total) {
         this.valor_total = valor_total;
@@ -87,6 +107,20 @@ public class Entrada implements Serializable, EntidadeBase {
 
     public Fornecedor getId_fornecedor() {
         return id_fornecedor;
+    }
+    
+    public String getDtNFFormat(){
+        SimpleDateFormat dt = new SimpleDateFormat("dd/MM/yyyy");
+        return dt.format(dt_NF);
+    }
+    
+    public String getDtEntradaFormat(){
+         SimpleDateFormat dt = new SimpleDateFormat("dd/MM/yyyy");
+        return dt.format(dt_entrada);
+    }
+    
+    public String getFornecedorNome(){
+        return id_fornecedor.getRazao_social();
     }
 
     public void setId_fornecedor(Fornecedor id_fornecedor) {

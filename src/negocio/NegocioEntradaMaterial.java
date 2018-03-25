@@ -6,11 +6,13 @@
 package negocio;
 
 import DAO.EntradaMaterialDAO;
+import java.util.List;
+import vo.Entrada;
 import vo.EntradaMaterial;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 public class NegocioEntradaMaterial {
     private EntradaMaterialDAO emDAO;
@@ -35,6 +37,10 @@ public class NegocioEntradaMaterial {
     
     public EntradaMaterial consultarPorId(EntradaMaterial em){
         return emDAO.consutarPorId(EntradaMaterial.class, em);
+    }
+    
+    public List<EntradaMaterial> buscarTodosPorEntrada(Entrada ent){
+        return emDAO.buscarPorEntrada(ent);
     }
     
     public String validar(EntradaMaterial em){

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" styleClass="..\..\..\utilitarios\style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.consulta.estoque.Consultar_EntradaMaterialController">
+   <children>
+      <BorderPane fx:id="bdpPrincipal" prefHeight="600.0" prefWidth="800.0" stylesheets="@../../../utilitarios/style.css">
+         <bottom>
+            <GridPane alignment="TOP_RIGHT" prefHeight="94.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox prefHeight="72.0" prefWidth="800.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="35.0" prefWidth="816.0">
+                           <children>
+                              <Button fx:id="btnImprimir" alignment="CENTER" mnemonicParsing="false" onAction="#btnImprimir_OnAction" onKeyPressed="#btnImprimirOnKeyPressed" prefWidth="100.0" styleClass="button-imprimir" text="Imprimir">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnVisualizar" alignment="CENTER" layoutX="280.0" layoutY="25.0" mnemonicParsing="false" onAction="#btnVisualizar_OnAction" onKeyPressed="#btnVisualizarOnKeyPressed" prefWidth="100.0" styleClass="button-consultar" text="Visualizar">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnVoltar" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#btnVoltar_OnAction" onKeyPressed="#btnVoltarOnKeyPressed" prefWidth="100.0" styleClass="button-voltar" text="%btn.voltar">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+         </bottom>
+         <center>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TableView fx:id="tblPrincipal" prefHeight="308.0" prefWidth="735.0">
+                     <columns>
+                        <TableColumn fx:id="tbcDtEntrada" prefWidth="123.0" text="Data de Entrada" />
+                        <TableColumn fx:id="tbcDtNF" minWidth="0.0" prefWidth="109.0" text="Data da NF" />
+                        <TableColumn fx:id="tbcFornecedor" prefWidth="219.0" text="Fornecedor" />
+                        <TableColumn fx:id="tbcNumNF" prefWidth="114.0" text="Número da NF" />
+                        <TableColumn fx:id="tbcValor" prefWidth="168.0" text="Valor" />
+                     </columns>
+                  </TableView>
+               </children>
+            </HBox>
+         </center>
+         <top>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="title" alignment="CENTER" contentDisplay="CENTER" styleClass="label-head" text="Consulta de Entrada de Material" textAlignment="CENTER">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <GridPane prefHeight="47.0" prefWidth="800.0">
+                     <children>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="325.0">
+                           <children>
+                              <Label text="%lbl.pesquisar">
+                                 <HBox.margin>
+                                    <Insets right="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                           <children>
+                              <TextField fx:id="txtBuscador" maxHeight="25.0" prefHeight="25.0" prefWidth="379.0">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </TextField>
+                              <Button fx:id="btnBuscar" mnemonicParsing="false" onAction="#btnBuscar_OnAction" onKeyPressed="#btnBuscarOnKeyPressed" prefHeight="25.0" prefWidth="25.0" styleClass="button-search">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="393.0" minWidth="10.0" prefWidth="200.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="631.0" minWidth="10.0" prefWidth="631.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="79.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+                  <GridPane>
+                     <children>
+                        <HBox prefHeight="28.0" prefWidth="620.0">
+                           <children>
+                              <RadioButton fx:id="rdbFornecedor" mnemonicParsing="false" selected="true" text="Fornecedor">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="Filtro" />
+                                 </toggleGroup>
+                                 <HBox.margin>
+                                    <Insets left="300.0" />
+                                 </HBox.margin>
+                              </RadioButton>
+                              <RadioButton fx:id="rdbNumNF" mnemonicParsing="false" text="Número da NF" toggleGroup="$Filtro" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+            </VBox>
+         </top>
+      </BorderPane>
+      <BorderPane fx:id="bdpSecundario" prefHeight="200.0" prefWidth="200.0" stylesheets="@../../../utilitarios/style.css" visible="false">
+         <top>
+            <HBox alignment="CENTER" prefHeight="164.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <VBox prefHeight="135.0" prefWidth="730.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="135.0" prefWidth="496.0">
+                           <children>
+                              <Label styleClass="label-head" text="Informaçao da Entrada">
+                                 <font>
+                                    <Font name="System Bold" size="24.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <GridPane prefHeight="65.0" prefWidth="734.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="419.0" minWidth="10.0" prefWidth="355.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="618.0" minWidth="10.0" prefWidth="375.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <HBox prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <Label text="Forncedor: " />
+                                          <Label fx:id="txtFornecedor" text="Label" />
+                                       </children>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                       <children>
+                                          <Label text="Nº NF: " />
+                                          <Label fx:id="txtNumNF" text="Label" />
+                                       </children>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label text="Data da Entrada: " />
+                                          <Label fx:id="txtDtEntrada" text="Label" />
+                                       </children>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label text="Data da NF: " />
+                                          <Label fx:id="txtDtNF" text="Label" />
+                                       </children>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2" />
+                                    <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label text="Valor da Nota: " />
+                                          <Label fx:id="txtValorTotal" text="Label" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </GridPane>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </top>
+         <bottom>
+            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <GridPane alignment="TOP_RIGHT" prefHeight="94.0" prefWidth="800.0">
+                     <children>
+                        <HBox prefHeight="72.0" prefWidth="800.0">
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="35.0" prefWidth="816.0">
+                                 <children>
+                                    <Button fx:id="btnImprimirMat" alignment="CENTER" mnemonicParsing="false" onAction="#btnImprimirMat_OnAction" onKeyPressed="#btnImprimirMatOnKeyPressed" prefWidth="100.0" styleClass="button-imprimir" text="Imprimir">
+                                       <HBox.margin>
+                                          <Insets left="10.0" right="10.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnRetornar" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#btnRetornar_OnAction" onKeyPressed="#btnRetornarOnKeyPressed" prefWidth="100.0" styleClass="button-voltar" text="%btn.voltar">
+                                       <HBox.margin>
+                                          <Insets left="10.0" right="10.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+            </HBox>
+         </bottom>
+         <center>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TableView fx:id="tblSecundaria" prefHeight="330.0" prefWidth="760.0">
+                     <columns>
+                        <TableColumn fx:id="tbcMaterial" prefWidth="499.0" text="Material" />
+                        <TableColumn fx:id="tbcQuantidade" prefWidth="134.0" text="Quantidade" />
+                        <TableColumn fx:id="tbcValorUnitario" prefWidth="126.0" text="Valor" />
+                     </columns>
+                  </TableView>
+               </children>
+            </HBox>
+         </center>
+      </BorderPane>
+   </children>
+</StackPane>

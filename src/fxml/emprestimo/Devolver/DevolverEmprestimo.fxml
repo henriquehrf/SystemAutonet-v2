@@ -376,7 +376,7 @@
                   </Tab>
                </tabs>
             </TabPane>
-            <AnchorPane fx:id="AnchorPaneValidation" prefHeight="200.0" prefWidth="200.0">
+            <AnchorPane fx:id="AnchorPaneValidation" prefHeight="200.0" prefWidth="200.0" visible="false">
                <children>
                   <Pane layoutX="171.0" layoutY="114.0" prefHeight="179.0" prefWidth="457.0" style="-fx-background-color: aliceblue;">
                      <children>
