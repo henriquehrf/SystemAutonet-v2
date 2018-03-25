@@ -23,7 +23,7 @@ public class EntradaDAO extends GenericoDAO<Entrada> {
         List<Entrada> lista;
 
         try {
-            query = em.createNamedQuery("Entrada.BuscarTodos");
+            query = em.createNamedQuery("Entrada.BuscarTodasEntradas");
             lista = query.getResultList();
 
         } catch (Exception ex) {

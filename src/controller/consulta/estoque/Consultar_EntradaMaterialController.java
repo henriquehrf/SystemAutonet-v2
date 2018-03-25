@@ -314,10 +314,10 @@ public class Consultar_EntradaMaterialController {
         } else {
             tableLoading(true);
         }
-
+        
         ObservableList<Entrada> entradaMaterial = FXCollections.observableArrayList();
         entradaMaterial.addAll(list);
-
+        
         this.tbcDtEntrada.setCellValueFactory(new PropertyValueFactory<Entrada, String>("DtEntradaFormat"));
         this.tbcDtNF.setCellValueFactory(new PropertyValueFactory<Entrada, String>("DtNFFormat"));
         this.tbcFornecedor.setCellValueFactory(new PropertyValueFactory<Entrada, String>("FornecedorNome"));
@@ -343,6 +343,7 @@ public class Consultar_EntradaMaterialController {
             public void run() {
                 todasEntrada = NegociosEstaticos.getNegocioEntrada().buscarTodos();
                 completarTabela(todasEntrada);
+
             }
         }.start();
     }

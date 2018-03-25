@@ -38,7 +38,7 @@ import vo.EstoqueMaterial;
  *
  * @author Henrique
  */
-public class ConsultarEstoque {
+public class ConsultarEstoqueController {
 
     @FXML
     private TableColumn<EstoqueMaterial, String> tbcQtdDisponivel;
@@ -101,15 +101,7 @@ public class ConsultarEstoque {
 
     List<EstoqueMaterial> todosMaterialEstoque = new ArrayList<>();
 
-    @FXML
-    void btnInserir_OnAction(ActionEvent event) {
-
-    }
-
-    @FXML
-    void btnInserirOnKeyPressed(ActionEvent event) {
-
-    }
+ 
 
     @FXML
     void btnVoltar_OnAction(ActionEvent event) {

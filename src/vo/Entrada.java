@@ -26,7 +26,7 @@ import utilitarios.Mask;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "Entrada.BuscarTodos", query = "Select e from Entrada e ORDER BY(e.dt_entrada)"),
+    @NamedQuery(name = "Entrada.BuscarTodasEntradas", query = "Select e from Entrada e ORDER BY(e.dt_entrada)"),
 })
 public class Entrada implements Serializable, EntidadeBase {
 
