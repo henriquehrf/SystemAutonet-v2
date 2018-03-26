@@ -19,7 +19,7 @@ import javax.persistence.NamedQuery;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 @Entity
 @NamedQueries({

@@ -16,14 +16,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "Baixa.BuscarTodasBaixas", query = "Select e from Baixa e ORDER BY(e.id_baixa)"),
+})
 public class Baixa implements Serializable, EntidadeBase {
 
     @Id
@@ -34,10 +39,13 @@ public class Baixa implements Serializable, EntidadeBase {
     private String observacao;
 
     @Temporal(TemporalType.DATE)
-    private Calendar dt_baixa;
+    private Date dt_baixa;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private TipoSaida id_tipo_saida = null;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Pessoa id_pessoa = null;
 
     @Override
     public Long getId() {
@@ -56,11 +64,11 @@ public class Baixa implements Serializable, EntidadeBase {
         this.observacao = observacao.toUpperCase();
     }
 
-    public Calendar getDt_baixa() {
+    public Date getDt_baixa() {
         return dt_baixa;
     }
 
-    public void setDt_baixa(Calendar dt_baixa) {
+    public void setDt_baixa(Date dt_baixa) {
         this.dt_baixa = dt_baixa;
     }
 
@@ -72,4 +80,11 @@ public class Baixa implements Serializable, EntidadeBase {
         this.id_tipo_saida = id_tipo_saida;
     }
 
+    public Pessoa getId_pessoa() {
+        return id_pessoa;
+    }
+
+    public void setId_pessoa(Pessoa id_pessoa) {
+        this.id_pessoa = id_pessoa;
+    }
 }

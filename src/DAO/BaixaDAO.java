@@ -5,12 +5,34 @@
  */
 package DAO;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import vo.Baixa;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 public class BaixaDAO extends GenericoDAO<Baixa> {
+    
+     public List<Baixa> buscarTodasBaixa() {
+        EntityManager em = getEM();
+        Query query;
+        List<Baixa> lista;
+
+        try {
+            query = em.createNamedQuery("Baixa.BuscarTodasBaixas");
+            lista = query.getResultList();
+
+        } catch (Exception ex) {
+            lista = new ArrayList();
+        } finally {
+            em.close();
+        }
+
+        return lista;
+    }
     
 }

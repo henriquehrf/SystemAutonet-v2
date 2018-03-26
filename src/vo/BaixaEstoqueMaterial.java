@@ -17,7 +17,7 @@ import javax.persistence.ManyToOne;
 
 /**
  *
- * @author Eduardo
+ * @author Henrique
  */
 @Entity
 public class BaixaEstoqueMaterial implements Serializable, EntidadeBase {
@@ -77,6 +77,18 @@ public class BaixaEstoqueMaterial implements Serializable, EntidadeBase {
 
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
+    }
+    
+    public String getMaterialDescricao(){
+        return this.id_estoquematerial.getId_material().getDescricao();
+    }
+    
+    public String getQuantidadeFormat(){
+        return this.quantidade + " "+ this.id_estoquematerial.getId_material().getId_tipo_unidade().getSigla();
+    }
+    
+    public String getLocalFormat(){
+        return this.id_estoquematerial.getId_departamento().getDescricao() + " "+  this.id_estoquematerial.getId_departamento().getNumero() +" - "+ this.id_estoquematerial.getId_departamento().getId_departamento().getSigla();
     }
 
 }
