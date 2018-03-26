@@ -69,7 +69,7 @@
                            <items>
                               <MenuItem fx:id="cons_mov_entradaMaterial" mnemonicParsing="false" onAction="#cons_mov_entradaMaterialOnAction" text="%mni.EntradaMaterial" />
                               <SeparatorMenuItem mnemonicParsing="false" />
-                              <MenuItem fx:id="cons_mov_saidaMaterial" mnemonicParsing="false" text="%mni.SaidaMaterial" />
+                              <MenuItem fx:id="cons_mov_saidaMaterial" mnemonicParsing="false" onAction="#cons_mov_saidaMaterialOnAction" text="%mni.SaidaMaterial" />
                            </items>
                         </Menu>
                      </items>

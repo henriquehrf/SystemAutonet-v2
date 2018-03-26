@@ -46,6 +46,13 @@
     -fx-font-size: 9pt;
     -fx-font-family: "Arial";
 }
+.text-areaRelatorio{
+    -fx-border-color:darkgrey;
+    -fx-background-color:none;
+    -fx-max-height:700;
+    -fx-font-size: 9pt;
+    -fx-font-family: "Arial";
+}
 .menu-bar{
     -fx-border-color:darkgrey;
     -fx-background-color:none;

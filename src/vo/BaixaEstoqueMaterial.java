@@ -14,12 +14,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 /**
  *
  * @author Henrique
  */
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "BaixaEstoqueMaterial.BuscarTodasBaixasDeEstoque", query = "Select e from BaixaEstoqueMaterial e ORDER BY(e.id_baixaestoquematerial)"),
+})
 public class BaixaEstoqueMaterial implements Serializable, EntidadeBase {
 
     @Id

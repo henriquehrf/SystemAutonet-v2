@@ -6,6 +6,7 @@
 package negocio;
 
 import DAO.BaixaEstoqueMaterialDAO;
+import java.util.List;
 import vo.BaixaEstoqueMaterial;
 
 /**
@@ -17,6 +18,10 @@ public class NegocioBaixaEstoqueMaterial {
     
     public NegocioBaixaEstoqueMaterial(){
         bemDAO = new BaixaEstoqueMaterialDAO();
+    }
+    
+    public List<BaixaEstoqueMaterial> todasBaixasEstoque(){
+        return bemDAO.buscarTodasEntrada();
     }
     
     public BaixaEstoqueMaterial salvar(BaixaEstoqueMaterial bem) throws Exception{

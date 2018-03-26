@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.consulta.estoque.Consultar_SaidaMaterialController">
+   <children>
+      <BorderPane fx:id="bdpPrincipal" prefHeight="600.0" prefWidth="800.0" stylesheets="@../../../utilitarios/style.css">
+         <bottom>
+            <GridPane alignment="TOP_RIGHT" prefHeight="94.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox prefHeight="72.0" prefWidth="800.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="35.0" prefWidth="816.0">
+                           <children>
+                              <Button fx:id="btnVisualizar" alignment="CENTER" mnemonicParsing="false" onAction="#btnVisualizarOnAction" prefWidth="100.0" styleClass="button-analisar" text="Consultar">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnVoltar" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#btnVoltar_OnAction" onKeyPressed="#btnVoltarOnKeyPressed" prefWidth="100.0" styleClass="button-voltar" text="%btn.voltar">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+         </bottom>
+         <center>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TableView fx:id="tblPrincipal" prefHeight="308.0" prefWidth="735.0">
+                     <columns>
+                        <TableColumn fx:id="tbcMaterial" prefWidth="395.0" text="Material" />
+                        <TableColumn fx:id="tbcLocal" prefWidth="338.0" text="Local" />
+                     </columns>
+                  </TableView>
+               </children>
+            </HBox>
+         </center>
+         <top>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="title" alignment="CENTER" contentDisplay="CENTER" styleClass="label-head" text="Saída de Material" textAlignment="CENTER">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <GridPane prefHeight="47.0" prefWidth="800.0">
+                     <children>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="325.0">
+                           <children>
+                              <Label text="%lbl.pesquisar">
+                                 <HBox.margin>
+                                    <Insets right="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                           <children>
+                              <TextField fx:id="txtBuscador" maxHeight="25.0" prefHeight="25.0" prefWidth="379.0">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </TextField>
+                              <Button fx:id="btnBuscar" mnemonicParsing="false" onAction="#btnBuscar_OnAction" onKeyPressed="#btnBuscarOnKeyPressed" prefHeight="25.0" prefWidth="25.0" styleClass="button-search">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="393.0" minWidth="10.0" prefWidth="200.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="631.0" minWidth="10.0" prefWidth="631.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints maxHeight="79.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+                  <GridPane>
+                     <children>
+                        <HBox prefHeight="28.0" prefWidth="620.0">
+                           <children>
+                              <RadioButton fx:id="rdbMaterial" mnemonicParsing="false" selected="true" text="Material">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="Filtro" />
+                                 </toggleGroup>
+                                 <HBox.margin>
+                                    <Insets left="300.0" />
+                                 </HBox.margin>
+                              </RadioButton>
+                              <RadioButton fx:id="rdbLocal" mnemonicParsing="false" text="Local" toggleGroup="$Filtro" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+            </VBox>
+         </top>
+      </BorderPane>
+      <AnchorPane fx:id="AnchorPaneValidation" prefHeight="200.0" prefWidth="200.0" stylesheets="@../../../utilitarios/style.css" visible="false">
+         <children>
+            <Pane layoutX="171.0" layoutY="114.0" prefHeight="179.0" prefWidth="457.0" style="-fx-background-color: aliceblue;">
+               <children>
+                  <ProgressIndicator fx:id="loading" layoutX="27.0" layoutY="63.0" />
+                  <Label fx:id="txtMsgLoading" layoutX="94.0" layoutY="82.0" prefHeight="17.0" prefWidth="340.0" styleClass="label-validation">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+         </children>
+      </AnchorPane>
+      <BorderPane fx:id="bdpSecundario" prefHeight="200.0" prefWidth="200.0" stylesheets="@../../../utilitarios/style.css" visible="false">
+         <top>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label styleClass="label-head" text="Movimentações de Saída" />
+               </children>
+            </HBox>
+         </top>
+         <center>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TextArea fx:id="txtAreaRelatorio" editable="false" maxHeight="261.0" prefHeight="261.0" prefWidth="701.0" styleClass="text-areaRelatorio" />
+               </children>
+            </HBox>
+         </center>
+         <bottom>
+            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <GridPane alignment="TOP_RIGHT" prefHeight="94.0" prefWidth="800.0">
+                     <children>
+                        <HBox prefHeight="72.0" prefWidth="800.0">
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="35.0" prefWidth="816.0">
+                                 <children>
+                                    <Button fx:id="btnImprimirMat" alignment="CENTER" mnemonicParsing="false" onAction="#btnImprimirMat_OnAction" prefWidth="100.0" styleClass="button-imprimir" text="Imprimir">
+                                       <HBox.margin>
+                                          <Insets left="10.0" right="10.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button fx:id="btnRetornar" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#btnRetornar_OnAction" prefWidth="100.0" styleClass="button-voltar" text="%btn.voltar">
+                                       <HBox.margin>
+                                          <Insets left="10.0" right="10.0" top="10.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                  </GridPane>
+               </children>
+            </HBox>
+         </bottom>
+      </BorderPane>
+   </children>
+</StackPane>

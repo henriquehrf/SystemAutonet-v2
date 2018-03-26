@@ -164,6 +164,17 @@ public class PrincipalController {
     }
 
     @FXML
+    void cons_mov_saidaMaterialOnAction(ActionEvent event) {
+        try {
+            Parent root;
+            root = FXMLLoader.load(ConsultarDepartamentoController.class.getClassLoader().getResource("fxml/consulta/Estoque/Consultar_SaidaMaterial.fxml"), ResourceBundle.getBundle("utilitarios/i18N_pt_BR"));
+            SystemAutonet.SCENE.setRoot(root);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    @FXML
     void cons_mov_entradaMaterialOnAction(ActionEvent event) {
         try {
             Parent root;

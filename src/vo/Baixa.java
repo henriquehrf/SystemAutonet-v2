@@ -7,6 +7,7 @@ package vo;
 
 import DAO.EntidadeBase;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import javax.persistence.Column;
@@ -27,8 +28,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "Baixa.BuscarTodasBaixas", query = "Select e from Baixa e ORDER BY(e.id_baixa)"),
-})
+    @NamedQuery(name = "Baixa.BuscarTodasBaixas", query = "Select e from Baixa e ORDER BY(e.id_baixa)"),})
 public class Baixa implements Serializable, EntidadeBase {
 
     @Id
@@ -62,6 +62,11 @@ public class Baixa implements Serializable, EntidadeBase {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao.toUpperCase();
+    }
+
+    public String getDt_baixaFormat() {
+        SimpleDateFormat dt = new SimpleDateFormat("dd/MM/yyyy");
+        return dt.format(dt_baixa);
     }
 
     public Date getDt_baixa() {
