@@ -5,9 +5,11 @@
  */
 package controller.consulta.estoque;
 
+import classesAuxiliares.ClasseDoSistemaEstatico;
 import classesAuxiliares.NegociosEstaticos;
 import controller.PrincipalController;
 import gui.SystemAutonet;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +39,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import utilitarios.Alertas;
+import utilitarios.GerarPDF;
 import vo.BaixaEstoqueMaterial;
 import vo.EmprestimoEstoqueMaterial;
 import vo.EstoqueMaterial;
@@ -149,6 +154,19 @@ public class Consultar_SaidaMaterialController {
 
     @FXML
     void btnImprimirMat_OnAction(ActionEvent event) {
+
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        Stage stage = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+        if (selectedDirectory != null) {
+            GerarPDF pdf = new GerarPDF();
+            try {
+                pdf.relatoriosGenericos(selectedDirectory.getAbsolutePath(), "Relatório de Saída de Materiais por Estoque", "SaidaMaterial", txtRelatorio);
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        }
 
     }
 

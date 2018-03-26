@@ -8,6 +8,7 @@ package controller.consulta.estoque;
 import classesAuxiliares.NegociosEstaticos;
 import controller.PrincipalController;
 import gui.SystemAutonet;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -33,7 +34,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import utilitarios.Alertas;
+import utilitarios.GerarPDF;
 import vo.Entrada;
 import vo.EntradaMaterial;
 import vo.EstoqueMaterial;
@@ -133,6 +137,18 @@ public class Consultar_EntradaMaterialController {
 
     @FXML
     void btnImprimir_OnAction(ActionEvent event) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        Stage stage = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+        if (selectedDirectory != null) {
+            GerarPDF pdf = new GerarPDF();
+            try {
+                pdf.consultaEntradaMaterialGeral(selectedDirectory.getAbsolutePath(), "Relatório de Consulta de Entrada de Material", "EntradaMaterial", tblPrincipal.getItems());
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        }
 
     }
 
@@ -314,10 +330,10 @@ public class Consultar_EntradaMaterialController {
         } else {
             tableLoading(true);
         }
-        
+
         ObservableList<Entrada> entradaMaterial = FXCollections.observableArrayList();
         entradaMaterial.addAll(list);
-        
+
         this.tbcDtEntrada.setCellValueFactory(new PropertyValueFactory<Entrada, String>("DtEntradaFormat"));
         this.tbcDtNF.setCellValueFactory(new PropertyValueFactory<Entrada, String>("DtNFFormat"));
         this.tbcFornecedor.setCellValueFactory(new PropertyValueFactory<Entrada, String>("FornecedorNome"));

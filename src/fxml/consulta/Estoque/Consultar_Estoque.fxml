@@ -24,7 +24,7 @@
                <children>
                   <HBox alignment="CENTER" prefHeight="35.0" prefWidth="816.0">
                      <children>
-                        <Button fx:id="btnInserir" alignment="CENTER" mnemonicParsing="false" prefWidth="100.0" styleClass="button-imprimir" text="Imprimir">
+                        <Button fx:id="btnImprimir" alignment="CENTER" mnemonicParsing="false" onAction="#btnImprimirOnAction" prefWidth="100.0" styleClass="button-imprimir" text="Imprimir">
                            <HBox.margin>
                               <Insets left="10.0" right="10.0" top="10.0" />
                            </HBox.margin>

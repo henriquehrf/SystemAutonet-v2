@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import vo.EmprestimoEstoqueMaterial;
+import vo.Entrada;
+import vo.EntradaMaterial;
+import vo.EstoqueMaterial;
 import vo.Material;
 import vo.Pessoa;
 
@@ -175,6 +178,130 @@ public class GerarPDF {
         document.add(dados);
 
         document.close();
+    }
+
+    public void relatoriosGenericos(String url, String Titulo, String nomeArquivo, String conteudo) throws Exception {
+
+        Date dt = new Date();
+
+        Document document = new Document();
+
+        PdfWriter.getInstance(document, new FileOutputStream(url + "/" + nomeArquivo + dt.getTime() + ".pdf"));
+        document.open();
+        document.addCreationDate();
+        String caminho = new File("./src/utilitarios/icones/icone.png").getCanonicalPath();
+        Image figura = Image.getInstance(caminho);
+        figura.scaleToFit(100, 100);
+        figura.setAlignment(1);
+        document.add(figura);
+
+        Paragraph p = new Paragraph("SystemAutoNet - " + Titulo);
+        p.setAlignment("center");
+        document.add(p);
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph(conteudo));
+        document.close();
+
+    }
+
+    public void consultaEstoqueGeral(String url, String Titulo, String nomeArquivo, List<EstoqueMaterial> lista) throws Exception {
+
+        Document document = new Document();
+        Date dt = new Date();
+        String pattern = "dd/MM/yyyy - hh:mm:ss";
+        String dtSolicitacao = new SimpleDateFormat(pattern).format(dt);
+
+        PdfWriter.getInstance(document, new FileOutputStream(url + "/" + nomeArquivo + dt.getTime() + ".pdf"));
+        document.open();
+        document.addCreationDate();
+        String caminho = new File("./src/utilitarios/icones/icone.png").getCanonicalPath();
+        Image figura = Image.getInstance(caminho);
+        figura.scaleToFit(100, 100);
+        figura.setAlignment(1);
+        document.add(figura);
+
+        Paragraph p = new Paragraph("SystemAutoNet - " + Titulo);
+        p.setAlignment("center");
+        document.add(p);
+        document.add(new Paragraph(" "));
+        document.add(gerarTabelaEstoque(lista));
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph("Gerado em: " + dtSolicitacao));
+        document.close();
+    }
+
+    public void consultaEntradaMaterialGeral(String url, String Titulo, String nomeArquivo, List<Entrada> lista) throws Exception {
+
+        Document document = new Document();
+        Date dt = new Date();
+        String pattern = "dd/MM/yyyy - hh:mm:ss";
+        String dtSolicitacao = new SimpleDateFormat(pattern).format(dt);
+
+        PdfWriter.getInstance(document, new FileOutputStream(url + "/" + nomeArquivo + dt.getTime() + ".pdf"));
+        document.open();
+        document.addCreationDate();
+        String caminho = new File("./src/utilitarios/icones/icone.png").getCanonicalPath();
+        Image figura = Image.getInstance(caminho);
+        figura.scaleToFit(100, 100);
+        figura.setAlignment(1);
+        document.add(figura);
+
+        Paragraph p = new Paragraph("SystemAutoNet - " + Titulo);
+        p.setAlignment("center");
+        document.add(p);
+        document.add(new Paragraph(" "));
+        document.add(gerarEntradaMaterialGeral(lista));
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph("Gerado em: " + dtSolicitacao));
+        document.close();
+    }
+
+    private PdfPTable gerarEntradaMaterialGeral(List<Entrada> lista) {
+        PdfPTable table = new PdfPTable(5);
+        PdfPCell cell;
+        table.addCell("DATA ENTRADA");
+        table.addCell("DATA DA NF");
+        table.addCell("FORNECEDOR");
+        table.addCell("NUM. NF");
+        table.addCell("VALOR");
+        
+        table.completeRow();
+
+        for (Entrada vo : lista) {
+            // table.addCell("" + list.get(i).getQtd_emprestada() + " " + list.get(i).getId_material().getId_tipo_unidade().getSigla());
+            table.addCell(vo.getDtEntradaFormat());
+            table.addCell(vo.getDtNFFormat());
+            table.addCell(vo.getFornecedorNome());
+            table.addCell(""+vo.getNumero_nf());
+            table.addCell(vo.getValorTotalFormat());
+            table.completeRow();
+        }
+
+        return table;
+    }
+
+    private PdfPTable gerarTabelaEstoque(List<EstoqueMaterial> lista) {
+
+        PdfPTable table = new PdfPTable(4);
+        PdfPCell cell;
+        table.addCell("MATERIAL");
+        table.addCell("QTD. DISP");
+        table.addCell("QTD. EMP");
+        table.addCell("LOCAL");
+        table.completeRow();
+
+        for (EstoqueMaterial vo : lista) {
+            // table.addCell("" + list.get(i).getQtd_emprestada() + " " + list.get(i).getId_material().getId_tipo_unidade().getSigla());
+            table.addCell(vo.getMaterialDescricao());
+            table.addCell(vo.getQtdDisponivelFormat());
+            table.addCell(vo.getQtdEmprestadaFormat());
+            table.addCell(vo.getLocalDescricao());
+            table.completeRow();
+        }
+
+        return table;
+
     }
 
 }

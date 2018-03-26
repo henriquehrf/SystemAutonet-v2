@@ -8,6 +8,7 @@ package controller.consulta.estoque;
 import classesAuxiliares.NegociosEstaticos;
 import controller.PrincipalController;
 import gui.SystemAutonet;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -31,6 +32,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import utilitarios.GerarPDF;
 import vo.EstoqueMaterial;
 
 /**
@@ -53,7 +57,7 @@ public class ConsultarEstoqueController {
     private TableView<EstoqueMaterial> tblPrincipal;
 
     @FXML
-    private Button btnInserir;
+    private Button btnImprimir;
 
     @FXML
     private TableColumn<EstoqueMaterial, String> tbcLocal;
@@ -101,8 +105,6 @@ public class ConsultarEstoqueController {
 
     List<EstoqueMaterial> todosMaterialEstoque = new ArrayList<>();
 
- 
-
     @FXML
     void btnVoltar_OnAction(ActionEvent event) {
         voltar();
@@ -128,6 +130,22 @@ public class ConsultarEstoqueController {
     @FXML
     void tblPrincipalOnMouseClicked(ActionEvent event) {
 
+    }
+
+    @FXML
+    void btnImprimirOnAction(ActionEvent event) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        Stage stage = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+        if (selectedDirectory != null) {
+            GerarPDF pdf = new GerarPDF();
+            try {
+                pdf.consultaEstoqueGeral(selectedDirectory.getAbsolutePath(), "Relatório de Consulta de Estoque", "ConsultaEstoque", tblPrincipal.getItems());
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        }
     }
 
     @FXML
