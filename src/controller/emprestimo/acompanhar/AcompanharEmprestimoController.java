@@ -11,6 +11,7 @@ import controller.PrincipalController;
 import enumm.PerfilUsuario;
 import enumm.StatusEmprestimo;
 import gui.SystemAutonet;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
@@ -44,7 +45,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import utilitarios.Alertas;
+import utilitarios.GerarPDF;
 import utilitarios.LerMessage;
 import vo.Emprestimo;
 import vo.EmprestimoEstoqueMaterial;
@@ -210,6 +214,26 @@ public class AcompanharEmprestimoController {
 
     @FXML
     void btnImprimirOnAction(ActionEvent event) {
+
+        String txt = "";
+
+        txt += "\tFinalidade: " + lblFinalidade.getText() + "\n";
+        txt += "\tData para Empréstimo: " + lblData.getText() + "\n";
+        txt += "\tObservação: " + lblObservacao.getText() + "\n";
+        txt += "\tSituação: " + tblPrincipal.getSelectionModel().getSelectedItem().getStatus_emprestimo().name() + "\n";
+
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        Stage stage = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+        if (selectedDirectory != null) {
+            GerarPDF pdf = new GerarPDF();
+            try {
+                pdf.acompanhamentoEmprestimo(selectedDirectory.getAbsolutePath(), "Relatório de Acompanhamento de Empréstimo", "AcomEmp", txt, tblDescricao.getItems());
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        }
 
     }
 

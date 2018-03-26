@@ -202,6 +202,27 @@ public class Consultar_EntradaMaterialController {
     @FXML
     void btnImprimirMat_OnAction(ActionEvent event) {
 
+        String txt = "";
+
+        txt += "\tFornecedor: " + txtFornecedor.getText() + "\n";
+        txt += "\tData de Entrada: " + txtDtEntrada.getText() + "\n";
+        txt += "\tNº NF: " + txtNumNF.getText() + "\n";
+        txt += "\tData da NF: " + txtDtNF.getText() + "\n";
+        txt += "\tValor da Nota " + txtValorTotal.getText() + "\n";
+
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        Stage stage = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+        if (selectedDirectory != null) {
+            GerarPDF pdf = new GerarPDF();
+            try {
+                pdf.consultaEntradaMaterialEspecifico(selectedDirectory.getAbsolutePath(), "Relatório de Consulta de Entrada de Material", "EntradaMaterialEsp", txt, tblSecundaria.getItems());
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+
+        }
+
     }
 
     @FXML
